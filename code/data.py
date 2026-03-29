@@ -10,11 +10,11 @@ Provides interface to data base.
 
 try:
     import sql
-except ModuleNotFoundError:
+except ImportError:
     from code import sql
 try:
     import misc
-except ModuleNotFoundError:
+except ImportError:
     from code import misc
 
 def getP_from_clues(mapping):

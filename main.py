@@ -8,15 +8,15 @@ Driver program for Bolinas Rod & Boat Club data management.
 
 try:
     from code import cli as ui
-except ModuleNotFoundError:
+except ImportError:
     import cli as ui
 try:
     from code import logic
-except ModuleNotFoundError:
+except ImportError:
     import logic
 try:
     from code import send_emails
-except ModuleNotFoundError:
+except ImportError:
     import send_emails
 
 cmds_available = [

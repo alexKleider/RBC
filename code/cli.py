@@ -13,7 +13,7 @@ i.e. import cli as ui
 
 try:
     import helpers
-except ModuleNotFoundError:
+except ImportError:
     from code import helpers
 
 

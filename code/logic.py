@@ -13,17 +13,17 @@ Can be imported by main.py and tested that way.
 
 try:
     import data
-except ModuleNotFoundError:
+except ImportError:
     from code import data
 
 try:
     import content
-except ModuleNotFoundError:
+except ImportError:
     from code import content
 
 try:
     from code import cli as ui
-except ModuleNotFoundError:
+except ImportError:
     import cli as ui
 
 #print("logic.py: being imported (or run.)")
