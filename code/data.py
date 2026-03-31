@@ -6,16 +6,13 @@
 Provides interface to data base.
 "Model" in MCV.
 (Lowest level, so no imports from local code.)
+Uses sqlite2 via sql.code module.
 """
 
 try:
     import sql
 except ImportError:
     from code import sql
-try:
-    import misc
-except ImportError:
-    from code import misc
 
 def getP_from_clues(mapping):
     """
@@ -80,14 +77,14 @@ def person_keys():
     return sql.keys_from_schema("People", (1,0))
 
 def put_person(mapping):
+    """
+    Creates an entry in the data base (People table.)
+    <mapping> must contain the relevant key/value pairs.
+    """
     keys = mapping.keys()
     k_listing = [ f'"{key}"' for key in keys]
     values = mapping.values()
     v_listing = [ f'"{value}"' for value in values]
-#       for key, value in mapping.items():
-#           print(f"{key}= {value}")
-#   else:
-#       print(f"{mapping=}")
     query = f"""
     INSERT INTO People
         ({", ".join(k_listing)}) 
@@ -95,14 +92,11 @@ def put_person(mapping):
         ({", ".join(v_listing)})
     ;
     """
-#   print(
-#       "data module ready to send the following query...")
-#   print(query)
     sql.fetch(query, from_file=False, commit=True)
 
 def put_applicant(mapping):
     """
-    Adds record to Applicant table.
+    Creates an entry in the data base (Applicant table.)
     <mapping> must contain the relevant key/value pairs.
     """
     query = f"""INSERT INTO Applicants (
@@ -119,20 +113,67 @@ def put_applicant(mapping):
 #   _ = input(query)
     sql.fetch(query, from_file=False, commit=True)
 
+def add_date(personID, date_key, date):
+    """
+    Adds specified <date> to specified <date_key>
+    for <personID> in the Applicant table
+    """
+    query = f"""
+        UPDATE Applicants SET
+        {date_key} = "{date}"
+        WHERE personID = {personID}
+        ;"""
+    print("In cli.add_date running:")
+    _ = input(query)
+    sql.fetch(query, from_file=False, commit=True)
+
+
+def get_app_info(id_):
+    query = f"""
+    SELECT A.personID, A.first, A.last, A.suffix,
+        A.email, AP.app_rcvd, AP.fee_rcvd,
+        AP.meeting1, AP.meeting2, AP.meeting3,
+        AP.approved, AP.dues_paid, AP.notified,
+        sp1.personID, sp1.first, sp1.last,
+            sp1.suffix, sp1.email,
+        sp2.personID, sp2.first, sp2.last,
+            sp2.suffix, sp2.email
+    FROM Applicants AS AP,
+             People AS A,
+             People AS sp1,
+             People AS sp2
+        WHERE A.personID = {id_}
+        AND A.personID = AP.personID
+        AND   AP.sponsor1ID = sp1.personID
+        AND   AP.sponsor2ID = sp2.personID
+        ;"""
+    maps = sql.dicts_from_query(query,
+                     replace_periods=True)
+    mappings = [map_ for map_ in maps]
+    if mappings:  # if not, returns None
+        return mappings[0]
+
+def update_applicant(mapping):
+    pass
+
 def get_highest_ID():
     """
-    Gets the highest ID- that of the last entry.
+    Gets the highest ID- that of the last People table entry.
     """
     query = """ SELECT personID FROM People
             ORDER BY personID DESC LIMIT 1;"""
     res = sql.fetch(query, from_file=False)
-#   print(f"Highest personID is {res[0][0]}")
     return res[0][0]
 
-
-def people_keys():
-    pass
+def ck_get_app_info():
+    mapping = get_app_info(249)
+    if mapping:
+        for key, value in mapping.items():
+            print(f"{key}: {value}")
+    else:
+        print("?Aborted?")
 
 if __name__ == "__main__":
     print("running code/data.py")
+    ck_get_app_info()
     pass

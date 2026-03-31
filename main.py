@@ -23,6 +23,7 @@ cmds_available = [
     logic.get_person,
     logic.get_sponsors,
     logic.enter_applicant,
+    logic.update_applicant,
     send_emails.test_send,
     ]
 
@@ -34,13 +35,12 @@ def main():
             res = None
             print(f"Running {command.__name__} ...")
             res = command()
-#           print(f"Running {command.__name__} yielded ...") print()
-#           print("command chosen yields...")
-#           print(f"{res}")
-#           print(f"End of {command.__name__} function.\n")
             if res:
                 print(f"{command.__name__} yielded...")
-                print(res)
+                if helpers.isiterable(res):
+                    for item in res:
+                        print(item)
+                else: print(res)
         else:
             print("Program ('main.py') aborted!")
             break

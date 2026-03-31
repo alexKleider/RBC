@@ -2,6 +2,10 @@
 
 # File: code/misc.py
 
+"""
+Used to test mailing without haveing to enter an appliant.
+"""
+
 app_mapping = {
         "personID": 67,
         "first": "Joe",

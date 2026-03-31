@@ -22,9 +22,8 @@ import mimetypes
 import hashlib
 import time
 import random
-from code import helpers
 
-json_email_file = "data/emails.json"
+json_email_file = "Data/emails.json"
 
 def getpw(service):
     """
@@ -226,24 +225,15 @@ def send(emails, mta_config=mta_config,
     host = mta_config["host"]
     port = mta_config["port"]
     sender = mta_config["from"]
-    helpers.add2report(report,
-        f"Initiating SMTP: {host} {port}",
-        also_print=True)
     s = smtplib.SMTP(host=host, port=port)
     s.starttls()
     s.ehlo
     # Comment out one of the following two:
-#   testing = True     # Very INSECURE: use only for testing.
-    testing = False    # This should be the default.
     s.login(mta_config['user'], mta_config['password'])
-    helpers.add2report(report,
-        f"Successfully connected to {mta_config['host']}",
-                       also_print=True)
     response = input("... Continue? ")
     if not (response and response[0] in 'yY'):
         sys.exit()
     counter = 0
-    print("Entering the 'try' statement...")
     try:
         for email in emails:
             counter += 1
@@ -255,9 +245,8 @@ def send(emails, mta_config=mta_config,
             del email['body']
 #           attachments = email['attachments']
 #           del email['attachments']
-            helpers.add2report(report,
-                f"Sending email {counter} of {n_emails} ...",
-                also_print=True)
+            print(
+                f"Sending email {counter} of {n_emails} ...")
             for key in email:
                 print(f"\t{key}: {email[key]}")
                 msg[key] = into_string(email[key])
@@ -268,16 +257,15 @@ def send(emails, mta_config=mta_config,
             try:
                 s.send_message(msg)
             except SMTPDataError:
-                helpers.add2report(report,
+                print(
                     "FAILURE sending email " +
-                    f"#{n} to {email['To']}",
-                    also_print=True)
+                    f"#{n} to {email['To']}")
                 continue
             if include_wait:
                 pause()
     except:
         s.quit()
-        helpers.add2report(report,
+        print(
             "Pymail.send.send() failed sending to {}."
                 .format(email['To']), also_print=True)
         raise
@@ -285,42 +273,31 @@ def send(emails, mta_config=mta_config,
 
 def test_send():
     print("Running send_emails.py test...")
-    test_body_1 = """
-    This is a test using
-    test_emails = [
-        {
-        'From': 'alex@kleider.ca',
-#       'Reply-To': 'rodandboatclub@gmail.com',
-        'To': ['alexkleider@gmail.com',
-                'akleider@sonic.net'],
-        'Cc': ['rodandboatclub@gmail.com',
-                'alexkleider@protonmail.com',],
-        'Bcc': 'alex@kleider.ca',
-        'Subject': 'TEST Reply-To',
-#       'attachments': [
-#       '/home/alex/Notes/Books/to-consider',],
-        'body': test_body_1,
-        },
-    Here's hoping it goes well.
-    Goog luck.
-    """
     mta = "easy"
-    test_emails = [
-        {
-        'From': 'alex@kleider.ca',
-#       'Reply-To': 'rodandboatclub@gmail.com',
+    mapping = {
+        'From': 'alexKleider@easydns.com',
+        'Reply-To': 'rodandboatclub@gmail.com',
         'To': ['akleider@sonic.net',
                 'alexkleider@gmail.com'],
         'Cc': ['alexkleider@protonmail.com',
                 'rodandboatclub@gmail.com',],
         'Bcc': 'alex@kleider.ca',
-        'Subject': 'TEST Reply-To',
+        'Subject': 'TESTing easydns SMTP regarding gmail.com.',
 #       'attachments': [
 #       '/home/alex/Notes/Books/to-consider',],
-        'body': test_body_1,
-        },
-    ]
+        }
+    body = "\n".join([f"{key}: {val}" for key, val in
+                      mapping.items()])
+    mapping['body'] = body
+    test_emails = [mapping,]
     send(test_emails)
+
+def get_json(file_name):
+    """
+    JSON reads <file_name>: must be a valid json file
+    """
+    with open(file_name, 'r') as f_obj:
+        return json.load(f_obj)
 
 def main():
     """
@@ -331,7 +308,7 @@ def main():
         in_file = json_email_file
     yn = input(f"OK to get json data from {in_file} (y/n)?")
     if yn and yn[0] in "yY":
-        data = helpers.get_json(in_file)
+        data = get_json(in_file)
         send(data, report=[])
 #   test_send()
 

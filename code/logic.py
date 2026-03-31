@@ -10,26 +10,19 @@ putters: person, applicant,
 !!!!!!! Won't run !!!!!!!
 Can be imported by main.py and tested that way.
 """
-
 try:
     import data
 except ImportError:
     from code import data
-
 try:
     import content
 except ImportError:
     from code import content
-
 try:
     from code import cli as ui
 except ImportError:
     import cli as ui
-
 #print("logic.py: being imported (or run.)")
-
-class Applicant(object):
-    pass
 
 def getID():
     """
@@ -109,6 +102,51 @@ def enter_applicant():
     data.put_applicant(ap_entry)
     return applicant | ap_entry
 
+def get_applicant(personID):
+    return data.get_app_info(personID)
+
+def update_applicant():
+    """
+    Provides for addition of dates to Applicant Table.
+    If not <id_>, calls get_person to get an ID
+    Returns None if fails to find an applicant.
+    """
+    # first must pick an applicant...
+    ap_map = {"personID": 0,
+              "first": "",
+              "last": "",
+              "suffix": "",
+              }
+    appl = ui.entries(ap_map,
+        header="Pick Applicant:by ID or clues",
+        text="If ID unknown, add name clues.")
+    id_ = appl["personID"]
+    if not id_:  # use pick person to get an ID
+        rec = get_person()
+        id_ = rec["personID"]
+    if not id_: return
+    mapping = get_applicant(id_)
+    ret = {}
+    keys = ["A_personID", "A_first", "A_last", "A_suffix",
+        "AP_meeting1", "AP_meeting2", "AP_meeting3",
+        "AP_approved", "AP_dues_paid", "AP_notified", ]
+    date_keys = keys[4:]
+    date_slot = None
+    for date_key in date_keys:
+        if not mapping[date_key]:
+            key2fill = date_key.split('_')[1]
+            break
+    header=f"{mapping['A_first']} {mapping['A_last']}"
+    if mapping["A_suffix"]:
+        header = header + mapping["A_suffix"]
+    text="Enter date (yyyymmdd)"
+
+    d = {f"{key2fill}": "",  }
+    ret = ui.entries(d, header=header, text=text)
+    data.add_date(mapping["A_personID"],
+                key2fill, ret[f"{key2fill}"])
+
+
 def app_intro_letter(app_mapping):
     """
     Sets up an email to be sent to applicant
@@ -125,22 +163,19 @@ def app_intro_letter(app_mapping):
         personID = {app_mapping["personID"]}
     ;"""
 
-def make_choice(listing):
-    pass
-
-def ck_get_person():
-    person = get_person()
-    for key, val in person.items():
-        print(f"{key}: {val}")
-
 def main():
     cmds_available = [
         get_person,
         get_sponsors,
         enter_applicant,
+        update_applicant,
         ] 
-    res = ui.choose(cmds_available)
-    print(res())
+    cmd = ui.choose(cmds_available)
+    print()
+    print(f"About to run {cmd.__name__} ...")
+    res = cmd()
+    print(f"Finished running {cmd.__name__} ==> ", end='')
+    print(res)
 
 if __name__ == "__main__":
     print("running code/logic.py")
