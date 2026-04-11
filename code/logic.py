@@ -107,7 +107,8 @@ def get_applicant(personID):
 
 def update_applicant():
     """
-    Provides for addition of dates to Applicant Table.
+    Provides for addition of dates to Applicant table
+    and Status table updates
     If not <id_>, calls get_person to get an ID
     Returns None if fails to find an applicant.
     """
@@ -145,6 +146,19 @@ def update_applicant():
     ret = ui.entries(d, header=header, text=text)
     data.add_date(mapping["A_personID"],
                 key2fill, ret[f"{key2fill}"])
+    # now need to update Person_Status table
+    # key2fill relationship to status mapping:
+    key_status_mapping = { # entry to update:
+            "meeting1":     3  # no meetngs yet
+            "meeting2":     4  # attended 1 meeting
+            "meeting3":     5  # attended 2 meeting
+            "AP_approved":  6  # attended 3 meeting
+            "AP_dues_paid": 7  # approved
+            "AP_notified":  8  # dues_paid
+            }
+    pass
+    
+    
 
 
 def app_intro_letter(app_mapping):

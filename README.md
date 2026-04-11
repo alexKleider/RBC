@@ -3,7 +3,7 @@
 
 # RBC
 
-A code (rewrite of Git/Sql) to support data management
+Code (rewrite of Git/Sql) to support data management
 by the Membership Chair of the Bolinas Rod & Boat Club
 
 An attempt this time is to follow MVC priniples although
