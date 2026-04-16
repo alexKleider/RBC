@@ -119,21 +119,21 @@ def entries(mapping,
                 mapping = {key: value for key, value
                            in ret.items()}
 
-accept = None
-
 def get_hints(header="People Table Lookup",
               text="Enter hints"):
     """
     Returns a mapping of first, last, +/- suffix
     """
+    accept = None
+
     def on_accept():
         root.quit()
-        global accept
+        nonlocal accept
         accept = True
     
     def on_abort():
         root.quit()
-        global accept
+        nonlocal accept
         accept = False
 
     root = tk.Tk()
