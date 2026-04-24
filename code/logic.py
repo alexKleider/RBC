@@ -22,11 +22,20 @@ try:
     from code import cli as ui
 except ImportError:
     import cli as ui
+try:
+    from code import helpers
+except ImportError:
+    import helpers
 #print("logic.py: being imported (or run.)")
+
+ap_fee = 25
+dues = 200
+
 
 def getID():
     """
     Returns the last entered personID.
+    Don't need a user interface version of this.
     """
     return data.get_highest_ID()
 
@@ -43,13 +52,14 @@ def get_person():
 #       print("func get_person returning...")
 #       print(choice)
         if choice:
-            if ui.ok(header=repr(choice),
-                 text="Confirm above is OK (y/n) "):
+            if ui.confirm_mapping(choice):
                 return choice
         else:
-            if not ui.announce(
+            yn = ui.yn(
                     header="Person not found...",
-                    text="Try again? (yn): "):
+                    text="Try again? (yn): ")
+            _ = input(f"ui.announce returning {yn}")
+            if not yn:
                 return
 
 def get_sponsors():
@@ -59,9 +69,8 @@ def get_sponsors():
     while True:
         sponsors = []
         while len(sponsors)<2:
-            n = len(sponsors) + 1
             ui.announce(header="Need 2 sponsors..",
-                        text=f"Enter sponsor #{n}:")
+                        text=f"Enter sponsor #{len(sponsors)+1}:")
             sponsor = get_person()
             if sponsor:
                 sponsors.append(sponsor)
@@ -96,11 +105,43 @@ def enter_applicant():
                   "fee_rcvd": "",
                   "meeting1": "",
                   }
-    ap_entry = ui.entries(ap_mapping,
+    ap_entry = ui.add_info(
         header="Applicant Dates",
-        text="Add dates as appropriate, leave IDs")
+        text="Add dates as appropriate, leave IDs",
+        ap_mapping, "app_rcvd", "fee_rcvd", "meeting1")
     data.put_applicant(ap_entry)
-    return applicant | ap_entry
+    ### Need to make entry into Person_Status table ###
+    ###  and possibly/probably into Receipts table  ###
+    if ap_mapping["meeting1"]:
+        print("need to send acknowledgement,")
+        print(query)
+        data.set_person_status(ap_mapping["personID"],
+                               4,
+                               ap_mapping["meeting1"])
+        print("& add to receipts")
+        data.add_receipt(ap_mapping["personID"],
+                         helpers.eightdigitdate,
+                         ap_fee,
+                         category="ap_fee")
+    elif ap_mapping["fee_rcvd"]:
+        # need to send acknowledgement
+        # status is 2 until acknowledgement is sent
+        # setting status '3|a0|No meetings yet'...
+        data.set_person_status(ap_mapping["personID"],
+                               3,
+                               ap_mapping["fee_rcvd"])
+        # adding to receipts...
+        data.add_receipt(ap_mapping["personID"],
+                         helpers.eightdigitdate,
+                         ap_fee,
+                         category="ap_fee")
+    elif ap_mapping["app_rcvd"]:
+        print("set status '1|a-|Application received without fee'")
+        pass # set status = 1
+        data.set_person_status(ap_mapping["personID"],
+                               1,
+                               ap_mapping["app_rcvd"])
+    return applicant | ap_entry  # Dict Merge (Python 3.9+)
 
 def get_applicant(personID):
     return data.get_app_info(personID)
@@ -149,12 +190,12 @@ def update_applicant():
     # now need to update Person_Status table
     # key2fill relationship to status mapping:
     key_status_mapping = { # entry to update:
-            "meeting1":     3  # no meetngs yet
-            "meeting2":     4  # attended 1 meeting
-            "meeting3":     5  # attended 2 meeting
-            "AP_approved":  6  # attended 3 meeting
-            "AP_dues_paid": 7  # approved
-            "AP_notified":  8  # dues_paid
+            "meeting1":     3,  # no meetngs yet
+            "meeting2":     4,  # attended 1 meeting
+            "meeting3":     5,  # attended 2 meeting
+            "AP_approved":  6,  # attended 3 meeting
+            "AP_dues_paid": 7,  # approved
+            "AP_notified":  8,  # dues_paid
             }
     pass
     
@@ -191,8 +232,17 @@ def main():
     print(f"Finished running {cmd.__name__} ==> ", end='')
     print(res)
 
+def ck_get_person():
+    ret = get_person()
+    if ret:
+        for key, value in ret.items():
+            print(f"{key}: {value}")
+    else:
+        print(f"get_person returned {ret}")
+    return ret
+
 if __name__ == "__main__":
     print("running code/logic.py")
-#   ck_get_person()
-    main()
+    ck_get_person()
+#   main()
 

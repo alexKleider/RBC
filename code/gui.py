@@ -20,6 +20,23 @@ except ImportError:
     from code import helpers
 
 
+def yn(header, text):
+    """
+    Returns True or False.
+    Note: closing the window using the [x] button in the top right
+    corner also returns false (same as hitting the "No" box.)
+    """
+    def show_yes_no_dialog():
+        result = messagebox.askyesno(header, text)
+        root.destroy()
+        return result
+    root = tk.Tk()
+    root.withdraw()    # Hide the main window
+    ret = show_yes_no_dialog()
+    root.mainloop()
+    return ret
+
+
 def announce(header="Note the following...",
              text="Announcing..."):
     """
@@ -51,13 +68,16 @@ def ok(header="Confirmation Required",
         return False
     return
 
-def choose(choices):
+def choose(choices, header="Choose",
+           text="Select one of the following:"):
     """
     <choices> must be a list of either functions or strings.
     Returns the chosen function or string.
     May return None (if choices is not an iterable,
                                 is an empty list,
                              or if no choice is made.)
+    Note: gui version selects the choice:
+    the cli version, selects corresponding number.
     """
     if not helpers.is_iterable(choices): return
     choices = [choice for choice in choices]
@@ -120,9 +140,11 @@ def entries(mapping,
                            in ret.items()}
 
 def get_hints(header="People Table Lookup",
-              text="Enter hints"):
+              text="Enter hints (use '%' as wildcard)"):
     """
-    Returns a mapping of first, last, +/- suffix
+    Returns a mapping of the "hints" regarding
+    first, last, +/- suffix keys. Remember to instruct
+    user to use "%" as the wild card.
     """
     accept = None
 
@@ -173,14 +195,18 @@ def get_hints(header="People Table Lookup",
     else:
         return
 
-def main():
+def test_get_hints():
+    print("Testing get_hints()- returns the hints...")
     res = get_hints(header="People Table Lookup",
-                              text="Enter hints")
+                    text="Enter hints (use '%' as wildcard")
     if res:
         for key, val in res.items():
             print(f"{key}: {val}")
     else:
         print("Mission aborted")
+
+def main():
+    test_get_hints()
 
 
 if __name__ == "__main__":

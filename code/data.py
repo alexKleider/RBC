@@ -3,16 +3,23 @@
 # File: code/data.py
 
 """
-Provides interface to data base.
-"Model" in MCV.
-(Lowest level, so no imports from local code.)
-Uses sqlite2 via sql.code module.
+Provides interface to data base via the sql.py module.
+"Model" in MCV. ...hence the name "data"
+(Lowest level, so no imports from local code
+except helpers (to get eightdigit date which
+is only used for testing.)
+Uses sqlite2 via sql.py module.
 """
 
 try:
     import sql
 except ImportError:
     from code import sql
+try:
+    import helpers
+except ImportError:
+    from code import helpers
+
 
 def getP_from_clues(mapping):
     """
@@ -30,9 +37,11 @@ def getP_from_clues(mapping):
     if suffix: conditions.append(f'suffix like "%{suffix}%"')
     if not conditions: return
     query = f"""
-    SELECT personID, first, last, suffix FROM People
+    SELECT personID, first, last, suffix, email
+    FROM People
     WHERE {' AND '.join(conditions)}
     ;"""
+#   _ = input(f"Clues query is\n{query}")
     ret = sql.dicts_from_query(query, from_file=False)
 #   print(query)
 #   for mapping in ret: print(mapping)
@@ -127,16 +136,47 @@ def add_date(personID, date_key, date):
     _ = input(query)
     sql.fetch(query, from_file=False, commit=True)
 
-partial_app_query = """
-SELECT A.personID, A.first, A.last, A.suffix,
-    A.email, A.phone, AP.app_rcvd, AP.fee_rcvd,
-    AP.meeting1, AP.meeting2, AP.meeting3,
-    AP.approved, AP.dues_paid, AP.notified,
-    sp1.personID, sp1.first, sp1.last,
+def set_person_status(personID, statusID, date):
+    query = f"""INSERT INTO Person_Status 
+        (personID, statusID, begin) VALUES
+        ({personID}, {statusID}, "{date}");"""
+#   _ = input(query)
+    sql.fetch(query, from_file=False, commit=True)
+
+
+def update_person_status(personID, old_status,
+                         new_status, date):
+    query = f"""UPDATE Person_Status SET end = {date}
+            WHERE personID = {personID}
+            AND statusID = {old_status};"""
+#   _ = input(query)
+    sql.fetch(query, from_file=False, commit=True)
+    set_person_status(personID, new_status, date)
+
+def add_receipt(personID, date, amnt, category="ap_fee"):
+    """
+    Makes entry into Receipts table.
+    <date> => both date_received & acknowledged fields
+    so should be used in conjunction with sending of
+    an acknowledgement email.
+    """
+    query = f"""INSERT INTO Receipts
+    (personID, date_received, {category}, acknowledged)
+    VALUES
+    ({personID}, "{date}", {amnt}, "{date}"); """
+    print(query)
+    sql.fetch(query, from_file=False, commit=True)
+
+partial_app_query = """SELECT
+        A.personID, A.first, A.last, A.suffix,
+        A.email, A.phone, AP.app_rcvd, AP.fee_rcvd,
+        AP.meeting1, AP.meeting2, AP.meeting3,
+        AP.approved, AP.dues_paid, AP.notified,
+        sp1.personID, sp1.first, sp1.last,
         sp1.suffix, sp1.email,
-    sp2.personID, sp2.first, sp2.last,
+        sp2.personID, sp2.first, sp2.last,
         sp2.suffix, sp2.email
-FROM Applicants AS AP,
+    FROM Applicants AS AP,
          People AS A,
          People AS sp1,
          People AS sp2
@@ -264,10 +304,18 @@ def ck_show_all_app_info():
         f.write("\n".join(show_all_app_info()))
     print(f"Applicant data written to {app_file}")
 
+def ck_update_person_status():
+    update_person_status(100, 3, 4, "20260422")
+
+def ck_add_receipt():
+    date = helpers.eightdigitdate
+    add_receipt(310, date, 25, category="ap_fee")
+
 
 if __name__ == "__main__":
     print("running code/data.py")
+    ck_add_receipt()
+#   ck_update_person_status()
 #   ck_get_app_info()
 #   ck_app_queries()
-    ck_show_all_app_info()
-    pass
+#   ck_show_all_app_info()

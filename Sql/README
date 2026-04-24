@@ -1,0 +1,7 @@
+
+# File: Sql/README
+
+    This directory is for miscelaneous Sql query code.
+    The Sqlite3 data files are in the Data directory...
+    NOT HERE IN THIS Sql directory!!!
+

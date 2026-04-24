@@ -4,8 +4,12 @@
 
 """
 Provides the user interface (cli or gui.)
-Presents (not implements) the application logic.
 "View" in MCV
+Presents (not implements) the application logic.
+#####################################################
+###       I believe this is redundant!!!          ###
+### Functionality provided is found in ../main.py ###
+#####################################################
 """
 
 print("code/userinterface.py: being imported (or run.)")

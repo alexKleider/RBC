@@ -1,0 +1,9 @@
+
+# File: README
+
+Code files proto_gui.py and gui.py need to be sorted.
+They are both attempting to provide the same functionality:
+... same functionality as cli.py but using tkinter.
+Code file userinterface.py seems completely redundant:
+... ../main.py does its job.
+

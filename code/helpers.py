@@ -6,6 +6,9 @@
 A very stripped down version of helpers.py
 used in other code bases.
 """
+from datetime import datetime
+today = datetime.today()
+eightdigitdate = today.strftime("%Y%m%d")
 
 def is_iterable(obj):
     try:
