@@ -105,10 +105,11 @@ def enter_applicant():
                   "fee_rcvd": "",
                   "meeting1": "",
                   }
-    ap_entry = ui.add_info(
+    ap_entry = ui.add_info(ap_mapping,
         header="Applicant Dates",
-        text="Add dates as appropriate, leave IDs",
-        ap_mapping, "app_rcvd", "fee_rcvd", "meeting1")
+        text="Add dates as appropriate, leave IDs"
+#       ap_mapping, "app_rcvd", "fee_rcvd", "meeting1")
+        )
     data.put_applicant(ap_entry)
     ### Need to make entry into Person_Status table ###
     ###  and possibly/probably into Receipts table  ###

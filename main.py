@@ -18,6 +18,10 @@ try:
     from code import send_emails
 except ImportError:
     import send_emails
+try:
+    from Sql import forJune
+except ImportError:
+    import forJune
 
 cmds_available = [
     logic.get_person,
@@ -25,6 +29,7 @@ cmds_available = [
     logic.enter_applicant,
     logic.update_applicant,
     send_emails.test_send,
+    forJune.member_email_listing,
     ]
 
 def main():
@@ -46,7 +51,8 @@ def main():
             break
 
 if __name__ == "__main__":
+    forJune.member_email_listing()
 #   logic.create_person()
-    main()
+#   main()
 #   print(f"{logic.getID()=}")
 #   logic.enter_applicant()
