@@ -11,6 +11,10 @@ try:
 except ImportError:
     import cli as ui
 try:
+    from code import helpers
+except ImportError:
+    import helpers
+try:
     from code import logic
 except ImportError:
     import logic
@@ -42,7 +46,7 @@ def main():
             res = command()
             if res:
                 print(f"{command.__name__} yielded...")
-                if helpers.isiterable(res):
+                if helpers.is_iterable(res):
                     for item in res:
                         print(item)
                 else: print(res)
@@ -51,8 +55,8 @@ def main():
             break
 
 if __name__ == "__main__":
-    forJune.member_email_listing()
+#   forJune.member_email_listing()
 #   logic.create_person()
-#   main()
+    main()
 #   print(f"{logic.getID()=}")
 #   logic.enter_applicant()

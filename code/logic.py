@@ -41,16 +41,13 @@ def getID():
 
 def get_person():
     """
-    Method of selecting an entry from 
-    the People table.
+    Method of selecting an entry (mapping)
+    from the People table.
     """
     while True:
-#       print("entering func get_person")
         hints = ui.get_hints()
         choices = data.getP_from_clues(hints)
         choice = ui.choose(choices)
-#       print("func get_person returning...")
-#       print(choice)
         if choice:
             if ui.confirm_mapping(choice):
                 return choice
@@ -58,13 +55,13 @@ def get_person():
             yn = ui.yn(
                     header="Person not found...",
                     text="Try again? (yn): ")
-            _ = input(f"ui.announce returning {yn}")
             if not yn:
                 return
 
 def get_sponsors():
     """
-    Returns a tuple of sponsor records.
+    Returns a mapping of both sponsors
+    with keys prefaced with "s1_" and "s2_"
     """
     while True:
         sponsors = []
@@ -74,7 +71,14 @@ def get_sponsors():
             sponsor = get_person()
             if sponsor:
                 sponsors.append(sponsor)
-        return sponsors
+        for key, val in sponsors[0].items():
+            ret0 = {f"s1_{key}": val for key, val in sponsors[0].items()}
+        for key, val in sponsors[1].items():
+            k = f"s2_{key}"
+            ret1 = {f"s2_{key}": val for key, val in sponsors[1].items()}
+        ret = ret0 | ret1
+        res = dict(sorted(ret.items()))
+        return res
 
 def create_person():
     """
@@ -94,22 +98,18 @@ def enter_applicant():
         header="Enter Applicant (new Person)",
         text="Get sponsors 1st, then enter data...")
     sponsors = get_sponsors()
-    sponsor1ID, sponsor2ID  = [sponsor["personID"]
-                for sponsor in sponsors]
     applicant = create_person()  # creates db entry
     app_id = getID()
     ap_mapping = {"personID": app_id,
-                  "sponsor1ID": sponsor1ID,
-                  "sponsor2ID": sponsor2ID,
+                  "sponsor1ID": sponsors["s1_personID"]["personID"],
+                  "sponsor2ID": sponsors["s2_personID"]["personID"],
                   "app_rcvd": "",
                   "fee_rcvd": "",
                   "meeting1": "",
                   }
-    ap_entry = ui.add_info(ap_mapping,
-        header="Applicant Dates",
-        text="Add dates as appropriate, leave IDs"
-#       ap_mapping, "app_rcvd", "fee_rcvd", "meeting1")
-        )
+    ap_entry = ui.add_info(    ap_mapping,
+                header="Applicant Dates",
+                text="Add dates as appropriate, leave IDs")
     data.put_applicant(ap_entry)
     ### Need to make entry into Person_Status table ###
     ###  and possibly/probably into Receipts table  ###
@@ -198,9 +198,6 @@ def update_applicant():
             "AP_dues_paid": 7,  # approved
             "AP_notified":  8,  # dues_paid
             }
-    pass
-    
-    
 
 
 def app_intro_letter(app_mapping):
@@ -242,8 +239,13 @@ def ck_get_person():
         print(f"get_person returned {ret}")
     return ret
 
+def ck_get_sponsors():
+    for key, val in get_sponsors().items():
+        print(f"{key}: {val}")
+
 if __name__ == "__main__":
-    print("running code/logic.py")
-    ck_get_person()
+    ck_get_sponsors()
+#   print("running code/logic.py")
+#   ck_get_person()
 #   main()
 

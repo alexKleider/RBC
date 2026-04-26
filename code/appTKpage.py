@@ -1,12 +1,13 @@
 #!/usr/bin/env python3
 
-# File: app_page.py
+# File: appTKpage.py
 
 """
 Supplies gui method of entering an Applicant's data.
 Unfortunately, tried to do too much.
-Probably better to simply make use of ...
+Expect this to be redacted but keeping it for reference.
 """
+
 import helpers
 import sql
 import tkinter as tk
