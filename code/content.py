@@ -1,6 +1,12 @@
 #!/usr/bin/env python3
 
 # File: code/content.py
+
+"""
+Contains email generationg code.
+Sending emails is done elsewhere.
+"""
+
 ap_text = """
 As Membership Chair it is my pleasure to welcome you as a new
 applicant for membership in the Bolinas Rod and Boat Club.
@@ -27,3 +33,6 @@ ap_rfc={
         "post_scripts": (),
         "e_and_or_p": "one_only",
         },
+
+if __name__ == "__main__":
+    print("Runnning code/content.py")

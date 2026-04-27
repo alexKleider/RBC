@@ -254,15 +254,16 @@ def send(emails, mta_config=mta_config,
 #           attach_many(attachments, msg) ## Fails, 2b trouble sh.
 #           for attachment in attachments:
 #               attach(attachment, msg)
-            try:
-                s.send_message(msg)
-            except SMTPDataError:
-                print(
-                    "FAILURE sending email " +
-                    f"#{n} to {email['To']}")
-                continue
-            if include_wait:
-                pause()
+            s.send_message(msg)
+#           try:
+#               s.send_message(msg)
+#           except smtplib.SMTPDataError:
+#               print(
+#                   "FAILURE sending email " +
+#                   f"#{n} to {email['To']}")
+#               continue
+#           if include_wait:
+#               pause()
     except:
         s.quit()
         print(

@@ -78,6 +78,7 @@ def get_sponsors():
             ret1 = {f"s2_{key}": val for key, val in sponsors[1].items()}
         ret = ret0 | ret1
         res = dict(sorted(ret.items()))
+        # emails provided by keys "s1_email" & "s2_email"
         return res
 
 def create_person():
@@ -98,7 +99,7 @@ def enter_applicant():
         header="Enter Applicant (new Person)",
         text="Get sponsors 1st, then enter data...")
     sponsors = get_sponsors()
-    applicant = create_person()  # creates db entry
+    applicant = create_person()  # >>> entry into People table
     app_id = getID()
     ap_mapping = {"personID": app_id,
                   "sponsor1ID": sponsors["s1_personID"]["personID"],
@@ -107,15 +108,15 @@ def enter_applicant():
                   "fee_rcvd": "",
                   "meeting1": "",
                   }
-    ap_entry = ui.add_info(    ap_mapping,
+    ap_entry = ui.add_info(ap_mapping,
+                "app_rcvd", "fee_rcvd", "meeting1",
                 header="Applicant Dates",
-                text="Add dates as appropriate, leave IDs")
-    data.put_applicant(ap_entry)
+                text="Add dates as appropriate:")
+    data.put_applicant(ap_entry)  # Applicant table entry
     ### Need to make entry into Person_Status table ###
     ###  and possibly/probably into Receipts table  ###
     if ap_mapping["meeting1"]:
-        print("need to send acknowledgement,")
-        print(query)
+        print("send fee and 1st meeting letter,")
         data.set_person_status(ap_mapping["personID"],
                                4,
                                ap_mapping["meeting1"])
@@ -125,7 +126,7 @@ def enter_applicant():
                          ap_fee,
                          category="ap_fee")
     elif ap_mapping["fee_rcvd"]:
-        # need to send acknowledgement
+        # need to send acknowledgement letter
         # status is 2 until acknowledgement is sent
         # setting status '3|a0|No meetings yet'...
         data.set_person_status(ap_mapping["personID"],
@@ -137,12 +138,13 @@ def enter_applicant():
                          ap_fee,
                          category="ap_fee")
     elif ap_mapping["app_rcvd"]:
-        print("set status '1|a-|Application received without fee'")
-        pass # set status = 1
+        # letter re app but no fee received
         data.set_person_status(ap_mapping["personID"],
                                1,
                                ap_mapping["app_rcvd"])
-    return applicant | ap_entry  # Dict Merge (Python 3.9+)
+    all_info = applicant | ap_entry  # Dict Merge (Python 3.9+)
+    # create letter here based on all_info mapping...
+    return all_info
 
 def get_applicant(personID):
     return data.get_app_info(personID)
@@ -199,22 +201,6 @@ def update_applicant():
             "AP_notified":  8,  # dues_paid
             }
 
-
-def app_intro_letter(app_mapping):
-    """
-    Sets up an email to be sent to applicant
-    and sponsors with bcc's to ...
-    Use code/content.py as source for ap_rfc
-    and ap_text
-    """
-    app_map = data.get_person(
-                    app_mapping["personID"],
-                    keys="first, last, email")
-    print(f"app_intro_letter => {app_map}")
-    query = f"""SELECT first, last, email
-        FROM People WHERE
-        personID = {app_mapping["personID"]}
-    ;"""
 
 def main():
     cmds_available = [

@@ -32,7 +32,8 @@ def yn(header="Confirmation Required",
     if yn and yn[0] in "yY":
         return True
 
-
+def ck_yn():
+    print(f"yn returning {yn()}")
 
 
 def announce(header="Note the following...",
@@ -108,7 +109,8 @@ def choose(choices,
     while True:
         print("*"*len(header))
         print(f"{header}: {text}")
-        for option in listing: print(f" {option}")
+        for option in listing:
+            print(f" {option[0]:>3}: {option[1]}")
         message = "Choose one (0 to quit): "
         if _callable: 
             message = ("Choose a function to " +
@@ -159,7 +161,7 @@ def add_info(mapping, *keys,
              text="Can only change some..."):
     """        
     Key/Value pairs of <mapping> are presented but the
-    user can only modify values of to the keys in <*keys>.
+    user can only modify values keyed by <*keys>.
     Returns an updated version of the mapping.
     """
     while True:
@@ -258,4 +260,5 @@ def main():
 if __name__ == "__main__":
     print("Running code/cli.py")
 #   main()
-    ck_add_info()
+    ck_yn()
+#   ck_add_info()

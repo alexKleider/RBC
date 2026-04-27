@@ -15,9 +15,9 @@ try:
 except ImportError:
     import helpers
 try:
-    from code import logic
-except ImportError:
     import logic
+except ImportError:
+    from code import logic
 try:
     from code import send_emails
 except ImportError:
