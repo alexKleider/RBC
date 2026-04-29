@@ -26,6 +26,7 @@ def getP_from_clues(mapping):
     Based on <mapping> with incomplete entries
     for keys: first, last, suffix, describing a person
     Returns a (possibly empty) list of matching records
+    including email
     or None (if no counditions speci.
     """
     first = mapping['first']
@@ -113,8 +114,8 @@ def put_applicant(mapping):
         app_rcvd, fee_rcvd, meeting1)
         VALUES (
         {mapping["personID"]},
-        {mapping["sponsor1ID"]},
-        {mapping["sponsor2ID"]},
+        {mapping["s1_ID"]},
+        {mapping["s2_ID"]},
         "{mapping["app_rcvd"]}",
         "{mapping["fee_rcvd"]}",
         "{mapping["meeting1"]}"

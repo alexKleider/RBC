@@ -21,5 +21,29 @@ Layers used are:
         The user interface
     * main
         The driver program although it can be driven by logic
-
+App_mapping keys are:
+    first: Joe
+    last: Schmo
+    suffix: 
+    phone: 868
+    address: Elm
+    town: Bo
+    state: CA
+    postal_code: 949
+    country: usa
+    email: js@mail
+    personID: 253
+    app_rcvd: 20260408
+    fee_rcvd: 20260428
+    meeting1: 
+    s1_ID: 97
+    s2_ID: 35
+    s1_first
+    s1_last
+    s1_suffix
+    s1_email
+    s2_first
+    s2_last
+    s2_suffix
+    s2_email
 

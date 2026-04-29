@@ -79,6 +79,10 @@ def get_sponsors():
         ret = ret0 | ret1
         res = dict(sorted(ret.items()))
         # emails provided by keys "s1_email" & "s2_email"
+#       print("get_sponsors (as res) returning...")
+#       for key, val in res.items():
+#           print(f"{key}: {val}")
+#       _ = input()
         return res
 
 def create_person():
@@ -94,7 +98,16 @@ def create_person():
         data.put_person(person)
     return person
 
-def enter_applicant():
+def applicant_mapping():
+    """
+    Returns a mapping of all info needed
+    to create an applicant and create
+    an appropriate acknolwdgement letter/email.
+    ie: what's needed to make entries into the
+    People, Applicant, Person_Status and possibly
+    Receipts tables. The info is passed on to the
+    sql module.
+    """
     ui.announce(
         header="Enter Applicant (new Person)",
         text="Get sponsors 1st, then enter data...")
@@ -102,8 +115,8 @@ def enter_applicant():
     applicant = create_person()  # >>> entry into People table
     app_id = getID()
     ap_mapping = {"personID": app_id,
-                  "sponsor1ID": sponsors["s1_personID"]["personID"],
-                  "sponsor2ID": sponsors["s2_personID"]["personID"],
+                  "s1_ID": sponsors["s1_personID"],
+                  "s2_ID": sponsors["s2_personID"],
                   "app_rcvd": "",
                   "fee_rcvd": "",
                   "meeting1": "",
@@ -113,9 +126,14 @@ def enter_applicant():
                 header="Applicant Dates",
                 text="Add dates as appropriate:")
     data.put_applicant(ap_entry)  # Applicant table entry
+    ap_mapping = ap_mapping | applicant | sponsors
+
     ### Need to make entry into Person_Status table ###
     ###  and possibly/probably into Receipts table  ###
+    # Letters assigned as category is determined...
     if ap_mapping["meeting1"]:
+        ap_mapping["letter"] = letters.letter_bodies[
+                app_with_1st_meeting]
         print("send fee and 1st meeting letter,")
         data.set_person_status(ap_mapping["personID"],
                                4,
@@ -129,6 +147,8 @@ def enter_applicant():
         # need to send acknowledgement letter
         # status is 2 until acknowledgement is sent
         # setting status '3|a0|No meetings yet'...
+        ap_mapping["letter"] = letters.letter_bodies[
+                new_applicant_welcome]
         data.set_person_status(ap_mapping["personID"],
                                3,
                                ap_mapping["fee_rcvd"])
@@ -139,12 +159,12 @@ def enter_applicant():
                          category="ap_fee")
     elif ap_mapping["app_rcvd"]:
         # letter re app but no fee received
+        ap_mapping["letter"] = letters.letter_bodies[
+                app_fee_pending]
         data.set_person_status(ap_mapping["personID"],
                                1,
                                ap_mapping["app_rcvd"])
-    all_info = applicant | ap_entry  # Dict Merge (Python 3.9+)
-    # create letter here based on all_info mapping...
-    return all_info
+    return ap_mapping
 
 def get_applicant(personID):
     return data.get_app_info(personID)
@@ -229,8 +249,23 @@ def ck_get_sponsors():
     for key, val in get_sponsors().items():
         print(f"{key}: {val}")
 
+def ck_applicant_mapping():
+    print("Running get_applicant.py")
+    dest = "app_entry_mapping"
+    mapping = logic.applicant_mapping()
+
+    if mapping:
+        with open(dest, 'w') as outf:
+            for key, val in mapping.items():
+#               print(f"{key}: {val}")
+                print(f"{key}: {val}", file=outf)
+        print(f"Applicant data sent to {dest}")
+    else:
+        print(f"applicant_mapping returned {mapping}")
+
 if __name__ == "__main__":
-    ck_get_sponsors()
+    ck_applicant_mapping()
+#   ck_get_sponsors()
 #   print("running code/logic.py")
 #   ck_get_person()
 #   main()
