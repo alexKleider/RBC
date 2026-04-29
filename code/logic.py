@@ -10,6 +10,11 @@ putters: person, applicant,
 !!!!!!! Won't run !!!!!!!
 Can be imported by main.py and tested that way.
 """
+import json
+try:
+    import letters
+except ImportError:
+    from code import letters
 try:
     import data
 except ImportError:
@@ -18,10 +23,6 @@ try:
     import content
 except ImportError:
     from code import content
-try:
-    from code import cli as ui
-except ImportError:
-    import cli as ui
 try:
     from code import helpers
 except ImportError:
@@ -98,15 +99,24 @@ def create_person():
         data.put_person(person)
     return person
 
+def add_ap_fee(ap_mapping, fee=ap_fee):
+    data.add_receipt(ap_mapping["personID"],
+                     ap_mapping['fee_rcvd'],
+                     ap_fee,
+                     category="ap_fee")
+
+def add_person_status(ap_mapping, statusID):
+    data.set_person_status(ap_mapping["personID"],
+           statusID,
+           ap_mapping["fee_rcvd"])  # begin date
+
 def applicant_mapping():
     """
     Returns a mapping of all info needed
     to create an applicant and create
-    an appropriate acknolwdgement letter/email.
-    ie: what's needed to make entries into the
-    People, Applicant, Person_Status and possibly
-    Receipts tables. The info is passed on to the
-    sql module.
+    the appropriate acknolwdgement letter/email.
+    Also makes entries into the People, Applicant,
+    Person_Status and Receipts tables via sql module.
     """
     ui.announce(
         header="Enter Applicant (new Person)",
@@ -121,55 +131,43 @@ def applicant_mapping():
                   "fee_rcvd": "",
                   "meeting1": "",
                   }
-    ap_entry = ui.add_info(ap_mapping,
+    ap_mapping = ui.add_info(ap_mapping,
                 "app_rcvd", "fee_rcvd", "meeting1",
                 header="Applicant Dates",
                 text="Add dates as appropriate:")
-    data.put_applicant(ap_entry)  # Applicant table entry
+    data.put_applicant(ap_mapping)  # Applicant table entry
     ap_mapping = ap_mapping | applicant | sponsors
+    helpers.dump2json_file(ap_mapping,
+                           "ap_mapping1.json")
 
     ### Need to make entry into Person_Status table ###
-    ###  and possibly/probably into Receipts table  ###
     # Letters assigned as category is determined...
     if ap_mapping["meeting1"]:
         ap_mapping["letter"] = letters.letter_bodies[
-                app_with_1st_meeting]
-        print("send fee and 1st meeting letter,")
-        data.set_person_status(ap_mapping["personID"],
-                               4,
-                               ap_mapping["meeting1"])
-        print("& add to receipts")
-        data.add_receipt(ap_mapping["personID"],
-                         helpers.eightdigitdate,
-                         ap_fee,
-                         category="ap_fee")
+                "app_with_1st_meeting"]
+        #!!!#("send fee and 1st meeting letter,")
+        add_person_status(ap_mapping, 4)
+        add_ap_fee(ap_mapping)  # Receipts table entry
     elif ap_mapping["fee_rcvd"]:
         # need to send acknowledgement letter
         # status is 2 until acknowledgement is sent
         # setting status '3|a0|No meetings yet'...
         ap_mapping["letter"] = letters.letter_bodies[
-                new_applicant_welcome]
-        data.set_person_status(ap_mapping["personID"],
-                               3,
-                               ap_mapping["fee_rcvd"])
+                "new_applicant_welcome"]
+        add_person_status(ap_mapping, 3)
         # adding to receipts...
-        data.add_receipt(ap_mapping["personID"],
-                         helpers.eightdigitdate,
-                         ap_fee,
-                         category="ap_fee")
+        add_ap_fee(ap_mapping)  # Receipts table entry
     elif ap_mapping["app_rcvd"]:
         # letter re app but no fee received
         ap_mapping["letter"] = letters.letter_bodies[
-                app_fee_pending]
-        data.set_person_status(ap_mapping["personID"],
-                               1,
-                               ap_mapping["app_rcvd"])
+                "app_fee_pending"]
+        add_person_status(ap_mapping, 1)
     return ap_mapping
 
-def get_applicant(personID):
+def get_applicant_table_entry(personID):
     return data.get_app_info(personID)
 
-def update_applicant():
+def update_applicant(id_=None):
     """
     Provides for addition of dates to Applicant table
     and Status table updates
@@ -177,7 +175,8 @@ def update_applicant():
     Returns None if fails to find an applicant.
     """
     # first must pick an applicant...
-    ap_map = {"personID": 0,
+    if not id_: id_ = 0
+    ap_map = {"personID": id_,
               "first": "",
               "last": "",
               "suffix": "",
@@ -190,7 +189,7 @@ def update_applicant():
         rec = get_person()
         id_ = rec["personID"]
     if not id_: return
-    mapping = get_applicant(id_)
+    mapping = get_applicant_table_entry(id_)
     ret = {}
     keys = ["A_personID", "A_first", "A_last", "A_suffix",
         "AP_meeting1", "AP_meeting2", "AP_meeting3",
@@ -229,7 +228,8 @@ def main():
         enter_applicant,
         update_applicant,
         ] 
-    cmd = ui.choose(cmds_available)
+    cmd = data.choose(cmds_available)  # may want to
+        #  add default key word params header & text
     print()
     print(f"About to run {cmd.__name__} ...")
     res = cmd()
@@ -251,15 +251,19 @@ def ck_get_sponsors():
 
 def ck_applicant_mapping():
     print("Running get_applicant.py")
-    dest = "app_entry_mapping"
-    mapping = logic.applicant_mapping()
+    dest = "app_entry.json"
+    mapping = applicant_mapping()
 
     if mapping:
         with open(dest, 'w') as outf:
+            json.dump(mapping, outf, indent=2)
+        print("(Applicant) data dumped to "
+                + f"{outf.name}")
+        yn = input(
+            "Print to screen as well? (yn): ")
+        if yn and yn[0] in "yY":
             for key, val in mapping.items():
-#               print(f"{key}: {val}")
-                print(f"{key}: {val}", file=outf)
-        print(f"Applicant data sent to {dest}")
+                print(f"{key}: {val}")
     else:
         print(f"applicant_mapping returned {mapping}")
 

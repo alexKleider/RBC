@@ -21,6 +21,21 @@ except ImportError:
     from code import helpers
 
 
+def announce(header="Note the following...",
+             text="Announcing..."):
+    ui.announce(header="Note the following...",
+             text="Announcing...")
+
+
+def choose(choices,
+           header="Choose",
+           text="(Select by number...)"):
+    return ui.choose(choices,
+           header="Choose",
+           text="(Select by number...)"):
+
+
+
 def getP_from_clues(mapping):
     """
     Based on <mapping> with incomplete entries
@@ -137,10 +152,10 @@ def add_date(personID, date_key, date):
     _ = input(query)
     sql.fetch(query, from_file=False, commit=True)
 
-def set_person_status(personID, statusID, date):
+def set_person_status(personID, statusID, begin_date):
     query = f"""INSERT INTO Person_Status 
         (personID, statusID, begin) VALUES
-        ({personID}, {statusID}, "{date}");"""
+        ({personID}, {statusID}, "{begin_date}");"""
 #   _ = input(query)
     sql.fetch(query, from_file=False, commit=True)
 
@@ -165,7 +180,7 @@ def add_receipt(personID, date, amnt, category="ap_fee"):
     (personID, date_received, {category}, acknowledged)
     VALUES
     ({personID}, "{date}", {amnt}, "{date}"); """
-    print(query)
+#   print(query)
     sql.fetch(query, from_file=False, commit=True)
 
 partial_app_query = """SELECT
