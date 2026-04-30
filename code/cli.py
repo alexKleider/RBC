@@ -67,8 +67,9 @@ def ok(header="Confirmation Required",
         return False
     return
 
-def confirm_mapping(mapping, header="Confirmation Required",
-                    text="Accept mapping as above? (y/n): "):
+def confirm_mapping(mapping,
+            header="Confirmation Required",
+            text="Accept mapping as above? (y/n): "):
     print("*"*len(header))
     print(header)
     print("*"*len(header))
@@ -200,7 +201,7 @@ def add_info(mapping, *keys,
 
 
 def get_hints(header="People Table Lookup",
-              text="Enter hints"):
+      text="Enter hints (no wild cards necessary.)"):
     """
     Returns a mapping of first, last, +/- suffix
     Do not enter wild cards- that's done elsewhere

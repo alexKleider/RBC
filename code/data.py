@@ -12,6 +12,10 @@ Uses sqlite2 via sql.py module.
 """
 
 try:
+    import cli as ui
+except ImportError:
+    from code import cli as ui
+try:
     import sql
 except ImportError:
     from code import sql
@@ -23,18 +27,45 @@ except ImportError:
 
 def announce(header="Note the following...",
              text="Announcing..."):
-    ui.announce(header="Note the following...",
-             text="Announcing...")
+    return ui.announce(header=header, text=text)
 
+def entries(mapping,
+    header="Data Entry",
+    text="Rtn to leave value as is, '_' to clear..."):
+    return ui.entries(mapping=mapping, text=text)
+
+def add_info(mapping, *keys,
+        header="Add/change values (_ reverses changes)",
+        text="Can only change some..."):
+    return ui.add_info(mapping=mapping, *keys,
+                header=header, text=text)
 
 def choose(choices,
            header="Choose",
            text="(Select by number...)"):
     return ui.choose(choices,
            header="Choose",
-           text="(Select by number...)"):
+           text="(Select by number...)")
+
+def confirm_mapping(mapping,
+            header="Confirmation Required",
+            text="Accept mapping as above? (y/n): "):
+    return cli.confirm_mapping(mapping=mapping,
+                               text=text)
 
 
+def yn(header="Confirmation Required",
+       text="OK to proceed? (y/n"):
+    return ui.yn(header=header, text=text)
+
+
+def get_hints(header="People Table Lookup",
+      text="Enter hints (no wild cards necessary.)"):
+    """
+    Returns a mapping of first, last, +/- suffix.
+    """
+    return ui.get_hints(header=header,
+      text=text)
 
 def getP_from_clues(mapping):
     """
@@ -84,20 +115,18 @@ def get_person(personID, keys=None):
 #   print(query)
     ret = [res for res in sql.query2dict_listing(query)]
     if not ret:
-#       ui.announce(header="Fatal problem!",
-#           text="Must have entered an invalid personID!!")
-        print("Must have entered an invalid personID!!")
+        announce(
+            "Must have entered an invalid personID!!")
         return
     if len(ret) > 1:
-#       ui.announce(header="Fatal problem!",
-#           text="get_person(id) should not return >1!!")
-        print("get_person(id) should not return >1!!")
+        announce(
+            "get_person(id) should not return >1!!")
         return
     return ret[0]
 
 def person_keys():
     """
-    Returns the keys of the People table.
+    Returns all keys of the People table except ID.
     """
     return sql.keys_from_schema("People", (1,0))
 

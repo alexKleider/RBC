@@ -10,7 +10,7 @@ putters: person, applicant,
 !!!!!!! Won't run !!!!!!!
 Can be imported by main.py and tested that way.
 """
-import json
+
 try:
     import letters
 except ImportError:
@@ -27,6 +27,10 @@ try:
     from code import helpers
 except ImportError:
     import helpers
+try:
+    import data
+except ImportError:
+    from code import data
 #print("logic.py: being imported (or run.)")
 
 ap_fee = 25
@@ -46,14 +50,18 @@ def get_person():
     from the People table.
     """
     while True:
-        hints = ui.get_hints()
+        hints = data.get_hints(
+            header="People Table Lookup",
+            text="Ener hints (no need for wild card)")
         choices = data.getP_from_clues(hints)
-        choice = ui.choose(choices)
+        choice = data.choose(choices,
+            header="Choices",
+            text="Select by number (0 to abort)..")
         if choice:
-            if ui.confirm_mapping(choice):
+            if data.confirm_mapping(choice):
                 return choice
         else:
-            yn = ui.yn(
+            yn = data.yn(
                     header="Person not found...",
                     text="Try again? (yn): ")
             if not yn:
@@ -67,36 +75,36 @@ def get_sponsors():
     while True:
         sponsors = []
         while len(sponsors)<2:
-            ui.announce(header="Need 2 sponsors..",
-                        text=f"Enter sponsor #{len(sponsors)+1}:")
+            data.announce(header="Need 2 sponsors..",
+              text=f"Enter sponsor #{len(sponsors)+1}:")
             sponsor = get_person()
             if sponsor:
                 sponsors.append(sponsor)
         for key, val in sponsors[0].items():
-            ret0 = {f"s1_{key}": val for key, val in sponsors[0].items()}
+            ret0 = {f"s1_{key}": val for
+                    key, val in sponsors[0].items()}
         for key, val in sponsors[1].items():
             k = f"s2_{key}"
-            ret1 = {f"s2_{key}": val for key, val in sponsors[1].items()}
+            ret1 = {f"s2_{key}": val for
+                    key, val in sponsors[1].items()}
         ret = ret0 | ret1
         res = dict(sorted(ret.items()))
         # emails provided by keys "s1_email" & "s2_email"
-#       print("get_sponsors (as res) returning...")
-#       for key, val in res.items():
-#           print(f"{key}: {val}")
-#       _ = input()
         return res
 
 def create_person():
     """
-    create an entry into the People table
+    Create an entry into the People table
+    Return mapping (including personID value)
     """
     keys = data.person_keys()
     mapping = {key: "" for key in keys}
-    person = ui.entries(mapping,
+    person = data.entries(mapping,
         header="Adding New Person to People Table",
-        text="Add values (or leave blank.. ")
+        text="Add values (empty strings accepted)... ")
     if person:
         data.put_person(person)
+        person["personID"] = getID()
     return person
 
 def add_ap_fee(ap_mapping, fee=ap_fee):
@@ -117,28 +125,33 @@ def applicant_mapping():
     the appropriate acknolwdgement letter/email.
     Also makes entries into the People, Applicant,
     Person_Status and Receipts tables via sql module.
+    <applicant>: data for People table plus personID
+    <ap_mapping>:
     """
-    ui.announce(
-        header="Enter Applicant (new Person)",
-        text="Get sponsors 1st, then enter data...")
+    applicant = create_person()  # >>> People table
+    fname = "new_person_mapping.json"
+    helpers.dump2json_file(applicant, fname)
+    applicant = helpers.get_json(fname)
     sponsors = get_sponsors()
-    applicant = create_person()  # >>> entry into People table
-    app_id = getID()
-    ap_mapping = {"personID": app_id,
-                  "s1_ID": sponsors["s1_personID"],
-                  "s2_ID": sponsors["s2_personID"],
+    ap_mapping = {"personID": applicant["personID"],
+                  "s1_ID": sponsors["s1_personID"],  # not all
+                  "s2_ID": sponsors["s2_personID"],  # of them.
                   "app_rcvd": "",
                   "fee_rcvd": "",
                   "meeting1": "",
                   }
-    ap_mapping = ui.add_info(ap_mapping,
+    ap_mapping = data.add_info(ap_mapping,
                 "app_rcvd", "fee_rcvd", "meeting1",
                 header="Applicant Dates",
                 text="Add dates as appropriate:")
+    fname =  "applicant_entry.json"
+    helpers.dump2json_file(ap_mapping, fname)
+    ap_mapping = helpers.get_json(fname)
     data.put_applicant(ap_mapping)  # Applicant table entry
     ap_mapping = ap_mapping | applicant | sponsors
-    helpers.dump2json_file(ap_mapping,
-                           "ap_mapping1.json")
+    fname = "final_ap_mapping.json"
+    helpers.dump2json_file(ap_mapping, fname)
+    ap_mapping = helpers.get_json(fname)
 
     ### Need to make entry into Person_Status table ###
     # Letters assigned as category is determined...
@@ -181,7 +194,7 @@ def update_applicant(id_=None):
               "last": "",
               "suffix": "",
               }
-    appl = ui.entries(ap_map,
+    appl = data.entries(ap_map,
         header="Pick Applicant:by ID or clues",
         text="If ID unknown, add name clues.")
     id_ = appl["personID"]
@@ -206,7 +219,7 @@ def update_applicant(id_=None):
     text="Enter date (yyyymmdd)"
 
     d = {f"{key2fill}": "",  }
-    ret = ui.entries(d, header=header, text=text)
+    ret = data.entries(d, header=header, text=text)
     data.add_date(mapping["A_personID"],
                 key2fill, ret[f"{key2fill}"])
     # now need to update Person_Status table
@@ -251,7 +264,7 @@ def ck_get_sponsors():
 
 def ck_applicant_mapping():
     print("Running get_applicant.py")
-    dest = "app_entry.json"
+    dest = "ck_app_entry.json"
     mapping = applicant_mapping()
 
     if mapping:

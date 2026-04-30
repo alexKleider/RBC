@@ -828,7 +828,8 @@ def show_json_data(json_data, underlinechar=''):
     return collector
 
 
-def dump2json_file(data, json_file, verbose=True):
+def dump2json_file(data, json_file,
+                   indent=2, verbose=True):
     """
     <json_file> if it exists will be overwritten!!
     """
@@ -836,7 +837,7 @@ def dump2json_file(data, json_file, verbose=True):
         if verbose:
             print('Dumping (json) data to "{}".'.format(
                   json_file_obj.name))
-        json.dump(data, json_file_obj, indent=2)
+        json.dump(data, json_file_obj, indent=indent)
 
 
 def add2json_file(data, json_file, verbose=True):
@@ -1461,13 +1462,27 @@ def ck_date_entry():
         print(date)
         print()
 
+def ck_dump2json():
+        me = dict(
+                first= "Alex",
+                last= "Kleider",
+                title= "DPhil(Oxon)",
+                )
+        jfile = "myData.json"
+        dump2json_file(me, jfile,
+                       verbose=False, indent=2)
+        print(f"Data sent to {jfile}.")
+        new_me = get_json(jfile)
+        print("Retrieved the following:")
+        print(new_me)
 
 if __name__ == "__main__":
+    ck_dump2json()
 #   main()
 #   test_Rec()
 #   ck_date_entry()
-    print(f"today: {today}")
-    print(f"date: {date}")
-    print(f"eightdigitdate: {eightdigitdate}")
-    print(f"eightdigitdate4filename: {eightdigitdate4filename}")
+#   print(f"today: {today}")
+#   print(f"date: {date}")
+#   print(f"eightdigitdate: {eightdigitdate}")
+#   print(f"eightdigitdate4filename: {eightdigitdate4filename}")
 
