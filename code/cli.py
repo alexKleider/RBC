@@ -96,7 +96,6 @@ def choose(choices,
     the cli version, selects corresponding number.
     """
     ### Needs to utilise the header and text fields ###
-
     if not helpers.is_iterable(choices): return
     choices = [choice for choice in choices]
     if not choices: return
@@ -218,6 +217,18 @@ def get_hints(header="People Table Lookup",
         yn = input(f"OK with {d}? ")
         if yn and yn[0] in "yY":
             return d
+
+def acceptable(content, header="Suggested Entry",
+               text="OK to proceed? (y/n): " ):
+    print("*"*len(header))
+    print(header)
+    print("-"*len(header))
+    print(content)
+    yn = input(text)
+    if yn and yn[0] in "yY":
+        return True
+
+
 
 def test_choose():
     choices = ['ying', 'yang', 'bang']

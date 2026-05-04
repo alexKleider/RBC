@@ -194,12 +194,15 @@ def dicts_from_query(query, from_file=False,
     If <keys> are not provided, uses <keys_from_query()>.
     Use query2dict_listing if a list is needed.
     """
+#   print(f"dicts_from_query has from_file set to {from_file}")
     if from_file:
         with open(query, 'r') as q_file:
             query = q_file.read()
+#   print(f"in dicts_from_query, query is\n{query}")
     if not keys:
         keys = keys_from_query(query,
-                               replace_periods=replace_periods)
+                       replace_periods=replace_periods)
+#   print(f"in dicts_from_query keys are.../n{keys}")
     res = fetch(query, from_file=False)
     for entry in res:
         d = dict(zip(keys, entry))
@@ -240,21 +243,31 @@ def query2dicts(query, from_file=False):
 
 
 def table2csv(table, fname):
+    """
+    Prints all entries in <table>
+    to <fname>.
+    """
     keys = keys_from_schema(table)
     query = f"SELECT * FROM {table};"
     with open(fname, 'w', newline='') as stream:
         dictwriter = csv.DictWriter(stream, keys)
         dictwriter.writeheader()
-        for mapping in dicts_from_query(query, keys):
+        for mapping in dicts_from_query(query,
+                                        keys=keys):
             dictwriter.writerow(mapping)
 
 def query2csv(query, fname):
+    """
+    <query> is text of query.
+    Results of the query go to <fname>
+    """
 #   keys = keys_from_query(query)
     keys = query_keys(query)
     with open(fname, 'w', newline='') as stream:
         dictwriter = csv.DictWriter(stream, keys)
         dictwriter.writeheader()
-        for mapping in dicts_from_query(query, keys):
+        for mapping in dicts_from_query(query,
+                                        keys=keys):
 #           _ = input(repr(mapping))
             dictwriter.writerow(mapping)
 

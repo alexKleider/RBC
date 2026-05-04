@@ -37,7 +37,7 @@ def entries(mapping,
 def add_info(mapping, *keys,
         header="Add/change values (_ reverses changes)",
         text="Can only change some..."):
-    return ui.add_info(mapping=mapping, *keys,
+    return ui.add_info(mapping, *keys,
                 header=header, text=text)
 
 def choose(choices,
@@ -50,7 +50,7 @@ def choose(choices,
 def confirm_mapping(mapping,
             header="Confirmation Required",
             text="Accept mapping as above? (y/n): "):
-    return cli.confirm_mapping(mapping=mapping,
+    return ui.confirm_mapping(mapping=mapping,
                                text=text)
 
 
@@ -164,8 +164,9 @@ def put_applicant(mapping):
         "{mapping["fee_rcvd"]}",
         "{mapping["meeting1"]}"
         ) ;"""
-#   _ = input(query)
-    sql.fetch(query, from_file=False, commit=True)
+    if ui.acceptable(query, header="Proposed Query:",
+                 title="Run the above query? (y/n)")
+        sql.fetch(query, from_file=False, commit=True)
 
 def add_date(personID, date_key, date):
     """

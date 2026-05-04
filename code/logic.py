@@ -33,6 +33,8 @@ except ImportError:
     from code import data
 #print("logic.py: being imported (or run.)")
 
+from code import cli as ui
+
 ap_fee = 25
 dues = 200
 
@@ -92,10 +94,12 @@ def get_sponsors():
         # emails provided by keys "s1_email" & "s2_email"
         return res
 
-def create_person():
+empty_dict = {}
+
+def create_person(empty_dict):
     """
     Create an entry into the People table
-    Return mapping (including personID value)
+    Return mapping with personID value.
     """
     keys = data.person_keys()
     mapping = {key: "" for key in keys}
@@ -105,6 +109,7 @@ def create_person():
     if person:
         data.put_person(person)
         person["personID"] = getID()
+    helpers.dump2json(person, "new_person_mapping.json")
     return person
 
 def add_ap_fee(ap_mapping, fee=ap_fee):
@@ -118,6 +123,46 @@ def add_person_status(ap_mapping, statusID):
            statusID,
            ap_mapping["fee_rcvd"])  # begin date
 
+def add_sponsors(applicant):
+    """
+    Adds sponsor data to applicant mapping.
+    Also adds first 3 date keys all /w empty values
+    """
+    sponsors = get_sponsors()
+    ap_mapping = {  #"personID": applicant["personID"],
+                  "s1_ID": sponsors["s1_personID"],  # not all
+                  "s2_ID": sponsors["s2_personID"],  # of them.
+                  "app_rcvd": "",
+                  "fee_rcvd": "",
+                  "meeting1": "",
+                  }
+    return applicant | ap_mapping
+
+def add_dates(applicant):
+    """Add up to first 3 Applicant date entries."""
+    ap_mapping = data.add_info(applicant,
+                "app_rcvd", "fee_rcvd", "meeting1",
+                header="Applicant Dates",
+                text="Add dates as appropriate:")
+    return applicant | ap_mapping
+
+def collect(func, mapping, f_name, header):
+    """
+    Choose between returning <func>(<mapping>) which is 
+    json loaded into <f_name> or returning a mapping
+    retrieved from <f_name>.
+    """
+    choice = ui.choose(
+            ["Pick from file", "Collect info"],
+            header=header)
+    if choice == "Pick from file":
+        return helpers.load_json_file(
+                f_name)
+    else: 
+        ret = func(mapping)
+        helpers.dump2json_file(ret, f_name)
+        return ret
+
 def applicant_mapping():
     """
     Returns a mapping of all info needed
@@ -128,25 +173,20 @@ def applicant_mapping():
     <applicant>: data for People table plus personID
     <ap_mapping>:
     """
-    applicant = create_person()  # >>> People table
-    fname = "new_person_mapping.json"
-    helpers.dump2json_file(applicant, fname)
-    applicant = helpers.get_json(fname)
-    sponsors = get_sponsors()
-    ap_mapping = {"personID": applicant["personID"],
-                  "s1_ID": sponsors["s1_personID"],  # not all
-                  "s2_ID": sponsors["s2_personID"],  # of them.
-                  "app_rcvd": "",
-                  "fee_rcvd": "",
-                  "meeting1": "",
-                  }
-    ap_mapping = data.add_info(ap_mapping,
-                "app_rcvd", "fee_rcvd", "meeting1",
-                header="Applicant Dates",
-                text="Add dates as appropriate:")
-    fname =  "applicant_entry.json"
-    helpers.dump2json_file(ap_mapping, fname)
-    ap_mapping = helpers.get_json(fname)
+    ## create People table entry & return mapping...
+    applicant = collect(create_person, {},
+            "new_person_mapping.json",
+            "Collect or Retrieve from JSON")
+    ## add sponsors & dates to <applicant> mapping...
+    applicant = collect(add_sponsors, applicant,
+            "appl_w_sponsors.json",
+            "Add sponsors or get from file?")
+    applicant = collect(add_dates, applicant,
+            "app_w_3dates.json",
+            "Add 3 dates or get from file?")
+
+redacted = '''
+#######################
     data.put_applicant(ap_mapping)  # Applicant table entry
     ap_mapping = ap_mapping | applicant | sponsors
     fname = "final_ap_mapping.json"
@@ -176,6 +216,7 @@ def applicant_mapping():
                 "app_fee_pending"]
         add_person_status(ap_mapping, 1)
     return ap_mapping
+    '''
 
 def get_applicant_table_entry(personID):
     return data.get_app_info(personID)

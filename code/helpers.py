@@ -839,6 +839,11 @@ def dump2json_file(data, json_file,
                   json_file_obj.name))
         json.dump(data, json_file_obj, indent=indent)
 
+def load_json_file(json_file):
+    """Returns data found in file named <json_file>."""
+    with open(json_file, 'r') as inf:
+        return json.load(inf)
+
 
 def add2json_file(data, json_file, verbose=True):
     """
@@ -1463,21 +1468,35 @@ def ck_date_entry():
         print()
 
 def ck_dump2json():
-        me = dict(
-                first= "Alex",
-                last= "Kleider",
-                title= "DPhil(Oxon)",
-                )
-        jfile = "myData.json"
-        dump2json_file(me, jfile,
-                       verbose=False, indent=2)
-        print(f"Data sent to {jfile}.")
-        new_me = get_json(jfile)
-        print("Retrieved the following:")
-        print(new_me)
+    me = dict(
+            first= "Alex",
+            last= "Kleider",
+            title= "DPhil(Oxon)",
+            )
+    jfile = "myData.json"
+    dump2json_file(me, jfile,
+                   verbose=False, indent=2)
+    print(f"Data sent to {jfile}.")
+    new_me = get_json(jfile)
+    print("Retrieved the following:")
+    print(new_me)
+
+def ck_load_json_file():
+    pass
+
+def ck_dump_load_json():
+    mapping = dict(first="Alex",
+                   last="Kleider",
+                   phone="868-0722",
+                   )
+    dump2json_file(mapping, "temp.json", verbose=False)
+    loaded_mapping = load_json_file("temp.json")
+    assert mapping == loaded_mapping
+    print("Success!!!")
 
 if __name__ == "__main__":
-    ck_dump2json()
+    ck_dump_load_json()
+#   ck_dump2json()
 #   main()
 #   test_Rec()
 #   ck_date_entry()
