@@ -163,7 +163,7 @@ def collect(func, mapping, f_name, header):
         helpers.dump2json_file(ret, f_name)
         return ret
 
-def applicant_mapping():
+def new_applicant():
     """
     Returns a mapping of all info needed
     to create an applicant and create
@@ -303,10 +303,10 @@ def ck_get_sponsors():
     for key, val in get_sponsors().items():
         print(f"{key}: {val}")
 
-def ck_applicant_mapping():
+def ck_new_applicant():
     print("Running get_applicant.py")
     dest = "ck_app_entry.json"
-    mapping = applicant_mapping()
+    mapping = new_applicant()
 
     if mapping:
         with open(dest, 'w') as outf:
@@ -319,10 +319,10 @@ def ck_applicant_mapping():
             for key, val in mapping.items():
                 print(f"{key}: {val}")
     else:
-        print(f"applicant_mapping returned {mapping}")
+        print(f"new_applicant returned {mapping}")
 
 if __name__ == "__main__":
-    ck_applicant_mapping()
+    ck_new_applicant()
 #   ck_get_sponsors()
 #   print("running code/logic.py")
 #   ck_get_person()
