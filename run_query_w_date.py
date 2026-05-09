@@ -22,19 +22,26 @@ except ImportError:
     from code import sql as sql_code
 
 today = helpers.eightdigitdate
-
+six_mo_ago = helpers.six_months_ago
 query_file = sys.argv[1]
-with open(sys.argv[1], 'r') as stream:
-    query = stream.read().format(today=today)
+parts = query_file.split(".")
+parts = parts[0].split("_")
+part = parts[-1]
+#_ = input(f"{part=}")
+if part == "f6": day = helpers.six_months_ago
+elif part == "f": day = helpers.eightdigitdate
+with open(query_file, 'r') as stream:
+    query = stream.read().format(day=day)
 #_ = input(query)
-#print(today)
+#print(day)
 outfile = "query_output.csv"
 yn = input(f"Send data to {outfile}? (y/n): ")
 if yn and yn[0] in 'yY':
     sql_code.query2csv(query, outfile)
 else:
+    print(sql_code.query_keys(query))
     res = sql_code.fetch(query, from_file=False)
     for line in res:
-        print(res)
+        print(line)
 
 

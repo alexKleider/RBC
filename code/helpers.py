@@ -28,7 +28,10 @@ date_template = "%b %d, %Y"
 date_w_wk_day_template = "%a, %b %d, %Y"
 date_year_template = "%y"
 today = datetime.datetime.today()  # a datetime object
-# sixdigitdate = today.strftime("%y%m%d")
+# Approximating 6 months as 182 days
+six_months_ago = today - datetime.timedelta(days=182)
+six_months_ago = six_months_ago.strftime("%Y%m%d")
+sixdigitdate = today.strftime("%y%m%d")
 eightdigitdate = today.strftime("%Y%m%d")
 eightdigitdate4filename = today.strftime("%Y-%m-%d")
 timestamp = today.strftime(         "%Y-%m-%d_%H:%M")
@@ -39,11 +42,27 @@ date = datetime.datetime.strptime(
         today.strftime(date_template),
         date_template
             ).strftime(date_template)
+
+
 N_FRIDAY = 4  # ord of Friday: m, t, w, t, f, s, s
               # should instead use rbc.Club.N_FRIDAY???
 FORMFEED = chr(ord('L') - 64)  # '\x0c'
 
 CURRENT_CENTURY = '20'
+
+
+def get_ord_suffix(day=today.day):
+    """day (of month) suffix"""
+    if 11 <= (day % 100) <= 13:
+        suffix = 'th'
+    else:
+        suffix = {1: 'st', 2: 'nd', 3: 'rd'}.get(day % 10, 'th')
+    return suffix
+
+day = today.day
+suffix = get_ord_suffix(day)
+date4letter = today.strftime(f"%B {day}{suffix}, %Y")
+
 
 def date_entry():
     """
@@ -828,7 +847,7 @@ def show_json_data(json_data, underlinechar=''):
     return collector
 
 
-def dump2json_file(data, json_file,
+def dump2json(data, json_file,
                    indent=2, verbose=True):
     """
     <json_file> if it exists will be overwritten!!
@@ -1474,7 +1493,7 @@ def ck_dump2json():
             title= "DPhil(Oxon)",
             )
     jfile = "myData.json"
-    dump2json_file(me, jfile,
+    dump2json(me, jfile,
                    verbose=False, indent=2)
     print(f"Data sent to {jfile}.")
     new_me = get_json(jfile)
@@ -1489,13 +1508,31 @@ def ck_dump_load_json():
                    last="Kleider",
                    phone="868-0722",
                    )
-    dump2json_file(mapping, "temp.json", verbose=False)
+    dump2json(mapping, "temp.json", verbose=False)
     loaded_mapping = load_json_file("temp.json")
     assert mapping == loaded_mapping
     print("Success!!!")
 
+def ck_date4letter():
+    print(f"Today is {date4letter}")
+
+def ck_dates():
+    print(f"{date_w_wk_day_template=}")
+    print(f"{date_year_template=}")
+    print(f"{today=}")
+    print(f"{sixdigitdate=}")
+    print(f"{eightdigitdate=}")
+    print(f"{eightdigitdate4filename=}")
+    print(f"{timestamp=}")
+    print(f"{timestamp4filename=}")
+    print(f"{month=}")
+    print(f"{this_year=}")
+    print(f"{date=}")
+
 if __name__ == "__main__":
-    ck_dump_load_json()
+    ck_dates()
+#   ck_date4letter()
+#   ck_dump_load_json()
 #   ck_dump2json()
 #   main()
 #   test_Rec()

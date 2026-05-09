@@ -67,6 +67,35 @@ def get_hints(header="People Table Lookup",
     return ui.get_hints(header=header,
       text=text)
 
+def in_good_standing(personID):
+    """
+    Is person with <personID> a member in good standing?
+    Returns True or False 
+    """
+    query = f""" SELECT statusID 
+        FROM Person_Status
+        WHERE personID = {personID}
+        AND statusID = 15
+        AND begin < "{helpers.eightdigitdate}"
+        AND end = ""
+        ; """
+#   print(query)
+    return sql.fetch(query, from_file=False)
+    if res:
+        return True
+        print(f"{personID} in good standing")
+        for line in res:
+            print(line)
+    else:
+        print(f"{personID} not in good standing")
+
+def ck_in_good_standing():
+    for id_ in (100, 250):
+        if in_good_standing(id_):
+            print(f"{id_} in good standing")
+        else:
+            print(f"{id_} not in good standing")
+
 def getP_from_clues(mapping):
     """
     Based on <mapping> with incomplete entries
@@ -146,13 +175,15 @@ def put_person(mapping):
         ({", ".join(v_listing)})
     ;
     """
-    sql.fetch(query, from_file=False, commit=True)
+    if ui.acceptable(query, header="Proposed Query:",
+                     text="Run the above query? (y/n)"):
+        sql.fetch(query, from_file=False, commit=True)
+    else:print(f"Failed to insert {mapping}")
 
-def put_applicant(mapping):
-    """
-    Creates an entry in the data base (Applicant table.)
-    <mapping> must contain the relevant key/value pairs.
-    """
+# create_% functions create database entries...
+
+def create_applicant_entry(mapping):
+    """ makes entry >> Applicant table"""
     query = f"""INSERT INTO Applicants (
         personID, sponsor1ID, sponsor2ID,
         app_rcvd, fee_rcvd, meeting1)
@@ -165,8 +196,35 @@ def put_applicant(mapping):
         "{mapping["meeting1"]}"
         ) ;"""
     if ui.acceptable(query, header="Proposed Query:",
-                 title="Run the above query? (y/n)")
+                     text="Run the above query? (y/n)"):
         sql.fetch(query, from_file=False, commit=True)
+
+def create_person_status_entry(ap_mapping):
+    """ makes entry >> Person_Status table"""
+    query = f"""INSERT INTO Person_Status (
+        personID, statusID, begin)
+        VALUES (
+        {ap_mapping["personID"]},
+        {ap_mapping["statusID"]},
+        {ap_mapping["begin"]}
+        ) ;"""
+    if ui.confirm_text(query):
+        sql.fetch(query, from_file=False,
+                       commit=True)
+
+def create_app_receipts_entry(ap_mapping):
+    """ makes entry >> Receipts table"""
+    query = f"""INSERT INTO Receipts (
+        personID, date_received, ap_fee, acknowledged)
+        VALUES (
+        {ap_mapping["personID"]},
+        {ap_mapping["app_rcvd"]},
+        {ap_mapping["app_fee"]},
+        {ap_mapping["app_rcvd"]}
+        ) ;"""
+    if ui.confirm_text(query):
+        sql.fetch(query, from_file=False,
+                       commit=True)
 
 def add_date(personID, date_key, date):
     """
@@ -178,8 +236,8 @@ def add_date(personID, date_key, date):
         {date_key} = "{date}"
         WHERE personID = {personID}
         ;"""
-    print("In cli.add_date running:")
-    _ = input(query)
+#   print("In cli.add_date running:")
+#   _ = input(query)
     sql.fetch(query, from_file=False, commit=True)
 
 def set_person_status(personID, statusID, begin_date):
@@ -198,6 +256,34 @@ def update_person_status(personID, old_status,
 #   _ = input(query)
     sql.fetch(query, from_file=False, commit=True)
     set_person_status(personID, new_status, date)
+
+def add_letter(mapping):
+    """
+    """
+    _ = input("Prepare letter_type in data.py")
+
+
+def receipts_and_status_entries(applicant):
+    """
+    Pakes entries into both the Receipts and the
+    Status tables as appropriate.
+    """
+    if applicant["fee_rcvd"]:
+        add_receipt(applicant["personID"],
+                    applicant["fee_rcvd"],
+                    25, category="ap_fee")
+    if applicant["meeting1"]:
+        applicant["statusID"] = 4
+        applicant["begin_date"] = applicant["meeting1"]
+    elif applicant["fee_rcvd"]:
+        applicant["begin_date"] = applicant["fee_rcvd"]
+        applicant["statusID"] = 3
+    else:  # application without fee!
+        applicant["begin_date"] = applicant["app_rcvd"]
+        applicant["statusID"] = 1
+    set_person_status(applicant["personID"],
+                      applicant["statusID"],
+                      applicant["begin_date"])
 
 def add_receipt(personID, date, amnt, category="ap_fee"):
     """
@@ -360,7 +446,8 @@ def ck_add_receipt():
 
 if __name__ == "__main__":
     print("running code/data.py")
-    ck_add_receipt()
+    ck_in_good_standing()
+#   ck_add_receipt()
 #   ck_update_person_status()
 #   ck_get_app_info()
 #   ck_app_queries()

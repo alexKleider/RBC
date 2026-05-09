@@ -67,6 +67,26 @@ def ok(header="Confirmation Required",
         return False
     return
 
+def confirm_text(query,
+            header="Confirmation Required",
+            text="Go ahead with above query? (y/n): "):
+    """Use primarily for queries but can take any text."""
+    print("*"*len(header))
+    print(header)
+    print("*"*len(header))
+    print(query)
+    yn = input(text)
+    if yn and yn[0] in "yY":
+        return True
+    if yn and yn[0] in "nN":
+        return False
+    return
+
+def ck_confirm_text():
+    query = "Select * from table;"
+    ret = confirm_text(query)
+    print(f"confirm_text '{query}' returned {ret}")
+
 def confirm_mapping(mapping,
             header="Confirmation Required",
             text="Accept mapping as above? (y/n): "):
@@ -81,6 +101,12 @@ def confirm_mapping(mapping,
     if yn and yn[0] in "nN":
         return False
     return
+
+def ck_confirm_mapping():
+    mapping = dict(first="Alex", last="Kleider",
+                    phone="1-650/269-8936")
+    ret = confirm_mapping(mapping)
+    print(f"confirm_mapping returning {ret}")
 
 
 def choose(choices,
@@ -227,6 +253,9 @@ def acceptable(content, header="Suggested Entry",
     yn = input(text)
     if yn and yn[0] in "yY":
         return True
+    if yn and yn[0] in "nN":
+        return False
+    return
 
 
 
@@ -271,6 +300,8 @@ def main():
 
 if __name__ == "__main__":
     print("Running code/cli.py")
+    ck_confirm_mapping()
+#   ck_confirm_text()
 #   main()
-    ck_yn()
+#   ck_yn()
 #   ck_add_info()

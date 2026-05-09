@@ -10,22 +10,25 @@ try: from code import helpers
 except : import helpers
 
 applicant_fee = 25
-today = "April 28, 2026"
+today = helpers.date
+signature = """
+Sincerely,
+
+Alex Kleider (Membership)
+"""
 
 letter_bodies = dict(
 
     for_testing="""
-as of {today}
+{"date"}
 
-Blah, Blah-
-more Blah blah
+Dear {"first"} {"last"},
 
-etc
+Blah, blah, blah.
+More to say.
 
+There's a second paragraph to add.
 
-May have as many 'extra's as required as long as each one
-has a corresponding entry in the record dict (typically arranged
-by the custom function.
 """,
 
     app_fee_pending="""
@@ -460,11 +463,24 @@ February so time is running out.
     )
 # ... end of letter_bodies.
 
-def ap_entry_letter(mapping):
+def generate_letter(mapping):
     """
-    <mapping> is <all_info> as returned by 
-    code.logic.applicant_entry()
+    <mapping> must contain all info needed:
+    letter body, date, recipient, cc, bcc,
+    and any letter content inserts.
     """
+    letter = letter_bodies[mapping["letter_body"]]
+    body = body.format(**mapping)
+    date = helpers.date
+    salutation = (f"Dear {mapping['first']} " +
+                  f"{mapping['last']},")
+    signature = "\nSincerely,\nAlex Kleider (Membership)"
+    postscripts = []
+    cc = mapping["ccs"]
+    bcc = mapping["bccs"]
+    pass
+
+def append_letter(letter):
     pass
 
 if __name__ == "__main__":

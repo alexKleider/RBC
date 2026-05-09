@@ -51,7 +51,7 @@ def main():
                         print(item)
                 else: print(res)
         else:
-            print("Program ('main.py') aborted!")
+            print("User terminated driver program!")
             break
 
 if __name__ == "__main__":

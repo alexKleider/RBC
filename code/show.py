@@ -7,29 +7,16 @@ Part of business logic ("C" of MCV).
 Sister to logic.py file.
 """
 
-from datetime import datetime
-today = datetime.today()
-# sixdigitdate = today.strftime("%y%m%d")
-eightdigitdate = today.strftime("%Y%m%d")
-eightdigitdate4filename = today.strftime("%Y-%m-%d")
-timestamp = today.strftime(         "%Y-%m-%d_%H:%M")
-timestamp4filename = today.strftime("%Y-%m-%d_%H-%M")
-month = today.month
-this_year = today.year
-
-
-try:
-    import data
-except ImportError:
-    from code import data
-try:
-    import sql
-except ImportError:
-    from code import sql
+try: import data
+except ImportError: from code import data
+try: import sql
+except ImportError: from code import sql
+try: import helpers
+except ImportError: from code import helpers
 
 mem_n_query = f"""
 /*  File: Sql/count_ff.sql */
-
+-- "1st yr" & "in good standing"
 SELECT count(*) FROM Person_Status
 WHERE statusID in (11, 15)
 AND (begin = "" OR begin <= "{eightdigitdate}")
@@ -37,6 +24,8 @@ AND (end = "" OR end > "{eightdigitdate}")
 ; """
 
 all_mem_query = f"""
+-- "1st yr", "in good standing", "honorary",
+-- "inactive" & "retiring"
 SELECT P.personID, P.first, P.last, P.suffix, P.phone,
 P.address, P.town, P.state, P.postal_code, P.email, 
 S.statusID, S.text
@@ -62,7 +51,7 @@ def current_n():
 def member_mappings():
     """
     Provides a listing of mappings of  all current members
-    (including honorary, inacrive and retiring.)
+    (including honorary, inactive and retiring.)
     """
     ret = sql.dicts_from_query(all_mem_query,
                 from_file=False, replace_periods=True)
