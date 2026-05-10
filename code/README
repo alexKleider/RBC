@@ -7,3 +7,11 @@ They are both attempting to provide the same functionality:
 Code file userinterface.py seems completely redundant:
 ... ../main.py does its job.
 
+Ultimate goal is to have gui.py and cli.py providing
+identical functionality to allow
+import gui as ui
+or
+import cli as ui
+Depending on which user interface one wishes to use.
+
+

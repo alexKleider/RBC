@@ -1,4 +1,8 @@
-/* Sql/applicants_f.sql */
+/* Sql/applicants_f.sql
+
+    Requires {today} to be a key provided by
+    the dict supplied to code/sql.fetch_d_query()
+*/
 SELECT
     P.personID, P.last, P.first, P.suffix,
     P.phone, P.address, P.town, P.state, P.postal_code, P.email,

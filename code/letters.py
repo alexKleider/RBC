@@ -16,6 +16,20 @@ Sincerely,
 
 Alex Kleider (Membership)
 """
+app_mapping = {  #  applicant to test mailing
+        "personID": 67,
+        "first": "Joe",
+        "last": "Blow",
+        "suffix": "",
+        "email": "myemail@provider.me",
+
+        "sponsor1ID": 39,
+        "sponsor2ID": 98,
+        "app_rcvd": "20260329",
+        "fee_rcvd": "20260329",
+        "meeting1": "",
+                  }
+
 
 letter_bodies = dict(
 

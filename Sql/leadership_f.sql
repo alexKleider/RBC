@@ -1,4 +1,4 @@
--- File: Sql/leadership_f.sql
+/* File: Sql/leadership_f.sql */
 
 SELECT P.personID, P.first, P.last, P.suffix,
     S.statusID,

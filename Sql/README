@@ -5,3 +5,10 @@
     The Sqlite3 data files are in the Data directory...
     NOT HERE IN THIS Sql directory!!!
 
+Files with an f have {provisions for string formatting.}
+Typically one would use the code/sql.py module's
+< fetch_d_query(sql_file_name, data, commit=False)" >
+method with data being a dict with keys wich include
+the place holder {key}s.
+
+

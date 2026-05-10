@@ -1,4 +1,7 @@
 /*  File: Sql/count_f.sql
+    Requires {today} to be specified twice.
+    Suggest code/sql.fetch_d_query() with a dict
+    containing a "today" key
 */
 
 

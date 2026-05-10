@@ -117,27 +117,28 @@ def fetch_d_query(sql_file_name, data, commit=False):
 
 def looseSQLcomments(query_text):
     """
-    Removes comments (/*...*/ and --....) from an sql query.
+    Returns sql query devoid of  comments.
     """
+    # first get rid of the /*..*/ comments:
     b = query_text.find("/*")
     while b > -1:
         e = query_text.find("*/")
         if not e > b:
-            print("!!!Unmatched /*..*/ in looseSQLcomments!!!")
+            print(
+            "!!!Unmatched /*..*/ in looseSQLcomments!!!")
             assert False
         query_text = query_text[:b] + query_text[e+2:]
         b =query_text.find("/*")
-    lines = query_text.split(sep="\n")
-    ret = []
-    for line in lines:
-        i = line.find("--")
-        if i > -1:
-            line = line[:i]
-        if line:
-            ret.append(line)
-    query_text = "\n".join(ret)
-    return query_text
-    
+    # now get rid of those prefaced by "--"
+    lines = []
+    for line in query_text.split("\n"):
+        line = line.strip()
+        n = line.find("--")
+        if n > -1:
+            line = line[:n]
+        lines.append(line)
+    return "\n".join(lines)
+
 
 def keys_from_schema(table, brackets=(0,0)):
     """
@@ -1168,9 +1169,19 @@ def test_id_by_name():
         else:
             print("No ID returned")
 
+def ck_looseSQLcomments():
+    f_name = "/home/alex/Git/RBC/Sql/appl_w_sponsors_f.sql"
+    clean_f = "clean_" + f_name.split("/")[-1]
+    with open(f_name, 'r') as f:
+        query = f.read()
+    clean_query = looseSQLcomments(query)
+    with open(clean_f, "w") as outf:
+        outf.write(clean_query)
+    print(f"See {clean_f} to comapre with {f_name}.")
 
 if __name__ == '__main__':
-    print(keys_from_schema("People", (1,4)))
+    ck_looseSQLcomments()
+#   print(keys_from_schema("People", (1,4)))
 #   db2csv()
     pass
 
