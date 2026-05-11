@@ -205,6 +205,7 @@ def dicts_from_query(query, from_file=False,
                        replace_periods=replace_periods)
 #   print(f"in dicts_from_query keys are.../n{keys}")
     res = fetch(query, from_file=False)
+#   _ = input(res)
     for entry in res:
         d = dict(zip(keys, entry))
         yield d

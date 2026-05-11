@@ -1,12 +1,12 @@
-/* Sql/appl_w_sponsors_f.sql */
+/* Sql/appl_dates_sponsors_f.sql */
 -- Requires {today} to be specified 
 SELECT
     P.personID, PS.statusID, P.last, P.first, P.suffix,
     P.phone, P.address, P.town, P.state, P.postal_code,
     P.email,
-    Ap.app_rcvd, App.meeting1, App.meeting3, App.meeting3,
-    S1.first, S1.last, S1.personID, PS1.statusID,
-    S2.first, S2.last, S2.personID, PS2.statusID
+    Ap.app_rcvd, Ap.meeting1, Ap.meeting2, Ap.meeting3,
+    S1.first, S1.last, S1.suffix, S1.personID, PS1.statusID,
+    S2.first, S2.last, S2.suffix, S2.personID, PS2.statusID
     -- check sponsor statusID ?member in good standing?
 FROM 
      People AS P,  --the applicant  |

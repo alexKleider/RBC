@@ -31,7 +31,8 @@ part = parts[-1]
 if part == "f6": day = helpers.six_months_ago
 elif part == "f": day = helpers.eightdigitdate
 with open(query_file, 'r') as stream:
-    query = stream.read().format(day=day)
+#   query = stream.read().format(day=day)
+    query = stream.read().format(today=day)
 #_ = input(query)
 #print(day)
 outfile = "query_output.csv"

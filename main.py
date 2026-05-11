@@ -33,7 +33,6 @@ cmds_available = [
     logic.new_applicant,
     logic.update_applicant,
     send_emails.test_send,
-    forJune.member_email_listing,
     ]
 
 def main():
