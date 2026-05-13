@@ -22,10 +22,6 @@ try:
     from code import send_emails
 except ImportError:
     import send_emails
-try:
-    from Sql import forJune
-except ImportError:
-    import forJune
 
 cmds_available = [
     logic.get_person,

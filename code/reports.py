@@ -30,8 +30,25 @@ def limit_line_lengths(entry, linelengthlimit=linelengthlimit):
             ret.append(line)
     return "\n".join(ret)
 
-def applicants():
+def applicant_mappings():
     """
+    Uses the "Sql/appl_dates_sponsors_f.sql" query to
+    retrieve a listing of applicant data mappings.
+    """
+    query = sql.import_query(
+            "Sql/appl_dates_sponsors_f.sql")
+    query = query.format(today=helpers.eightdigitdate)
+    apps = sql.dicts_from_query(query, from_file=False,
+                                replace_periods=True)
+
+    return [mapping for mapping in apps] 
+
+
+def applicant_listing(mappings):
+    """
+    provides a formatted with headers 'by number of meetings'
+    listing of applicant data. Returns a list of lines.
+    <mappings> come from applicant_mappings().
     """
     template = """
   [{P_personID:>3}], {P_first} {P_last} {P_suffix} {P_email} {P_phone}
@@ -41,20 +58,12 @@ def applicants():
     add2 = "Meetings: {Ap_meeting1}, {Ap_meeting2}"
     add1 = "Meeting date: {Ap_meeting1}"
 
-    query = sql.import_query(
-            "Sql/appl_dates_sponsors_f.sql")
-    query = query.format(today=helpers.eightdigitdate)
-    apps = sql.dicts_from_query(query, from_file=False,
-                                replace_periods=True)
-    apps = [mapping for mapping in apps]
     no_meetings = []; header0 = "No Meetings Yet"
     one_meeting = []; header1 = "Attended One Meeting"
     two_meetings = []; header2 = "Attended Two Meetings"
     three_meetings = []; header3 = "Attended Three Meetings"
-    report = [f"Applicants- currently {len(apps)} in number", ]
-    report.append('=' * len(report[0]))
-    report.append('')
     m3 = []; m2 = []; m1 = []; m0 = []
+    apps = applicant_mappings()
     for map in apps:
         if map["Ap_meeting3"]:
             m3.append(map)
@@ -66,6 +75,7 @@ def applicants():
             m0.append(map)
         else:
             _ = input("bypassed!!!")
+    report = []
     if m0:
         report.append(header0)
         report.append('-' * len(report[-1]))
@@ -96,7 +106,39 @@ def applicants():
             report.append(limit_line_lengths(
                 template3.format(**d)))
         report.append("")
-    return '\n'.join(report)
+    return report
+
+
+def applicant_report():
+    """
+    """
+    mappings = applicant_mappings()
+    date_line = f" as of {helpers.date}."
+    report = [f"Applicants- currently {len(mappings)} in number"
+              + date_line, ]
+#   date_line = " " * (len(report[0])- len(date_line)) + date_line
+#   report.append(date_line)
+    report.append('=' * len(report[0]))
+    report.append('')
+    report.extend(applicant_listing(mappings))
+    return report
+
+def membership_report():
+    report = []
+    report.extend(applicant_report())
+    report.extend(
+        ['',
+         "Respectfully submitted by...\n",
+         "   Alex Kleider, Membership Chair,",
+         "for presentation to the Executive Committee on {}"
+         .format(helpers.next_first_friday(exclude=True)),
+         "(or at their next meeting, which ever comes first.)",
+         ])
+    report.extend(
+        ['',
+         'PS Zoom ID: 527 109 8273; Password: 999620',
+        ])
+    return report
 
 def forWeb():
     """
@@ -111,14 +153,22 @@ What are your plans for the summer of 2026?
     print(f"{text}")
     print(limit_line_lengths(text, 35))
 
-def ck_applicants():
-    app_report = "applicant_report.txt"
-    report = applicants()
-    with open(app_report, 'w') as outf:
+def ck_applicant_report():
+    file_name = "applicant_report.txt"
+    report = "\n".join(applicant_report())
+    with open(file_name, 'w') as outf:
         outf.write(report)
-    print(f"Applicant report sent to '{app_report}'")
+    print(f"Applicant report sent to '{file_name}'")
+
+def ck_membership_report():
+    file_name = "membership_report.txt"
+    report = "\n".join(membership_report())
+    with open(file_name, 'w') as outf:
+        outf.write(report)
+    print(f"Membership report sent to '{file_name}'")
 
 if __name__ == "__main__":
 #   ck_limit_line_lengths()
-    ck_applicants()
+    ck_membership_report()
+    ck_applicant_report()
 #   print("Running code/reports.py")
