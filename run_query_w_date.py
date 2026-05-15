@@ -28,8 +28,9 @@ parts = query_file.split(".")
 parts = parts[0].split("_")
 part = parts[-1]
 #_ = input(f"{part=}")
-if part == "f6": day = helpers.six_months_ago
-elif part == "f": day = helpers.eightdigitdate
+#f part == "f6": day = helpers.six_months_ago
+#lif part == "f": day = helpers.eightdigitdate
+day = helpers.eightdigitdate
 with open(query_file, 'r') as stream:
 #   query = stream.read().format(day=day)
     query = stream.read().format(today=day)
