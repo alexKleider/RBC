@@ -1,4 +1,6 @@
-/* File: Sql/expired_f6.sql (31 * 6 = 186) */
+/* File: Sql/expired_f6.sql (31 * 6 = 186)
+Lists any applicants who have not put in their
+6 meeting since the time of ther first meeting */
 
 SELECT P.personID, P.first, P.last, P.suffix,
         S1.first, S1.last, S1.suffix,
@@ -11,7 +13,7 @@ FROM People as P,
 WHERE A.personID = P.personID
 AND   A.sponsor1ID = S1.personID 
 AND   A.sponsor2ID = S2.personID
-AND   A.meeting1 < {day}
+AND   A.meeting1 < {helpers.six_months_ago}
 AND   A.meeting3 = ""
 AND   A.notified = ""
 ;

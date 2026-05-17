@@ -67,6 +67,53 @@ def get_hints(header="People Table Lookup",
     return ui.get_hints(header=header,
       text=text)
 
+def get_mappings(which_type):
+    queries = dict(
+        applicants= ("Sql/appl_dates_sponsors_f.sql",
+                     helpers.eightdigitdate),
+        all_members = ("Sql/all_members_ff.sql",
+                     helpers.eightdigitdate),
+        leadership = ("Sql/leadership_f.sql",
+                     helpers.eightdigitdate),
+        expired = ("Sql/expired_ff.sql",
+                     helpers.six_months_ago),
+            )
+    query = sql.import_query(queries[which_type][0])
+    frmt = queries[which_type][1]
+    query = query.format(today=frmt)
+    res = sql.dicts_from_query(query, from_file=False,
+                               replace_periods=True)
+    return [mapping for mapping in res]
+
+redact = '''
+def applicant_mappings():
+    """
+    Uses the "Sql/appl_dates_sponsors_f.sql" query to
+    retrieve a listing of applicant data mappings.
+    """
+    query = sql.import_query(
+            "Sql/appl_dates_sponsors_f.sql")
+    query = query.format(today=helpers.eightdigitdate)
+    apps = sql.dicts_from_query(query, from_file=False,
+                                replace_periods=True)
+
+    return [mapping for mapping in apps] 
+'''
+
+def numbers(m_type):
+    """
+    <m_type> options: "in_good_standing", "first_yr",
+    "honorary", "inactive", "retiring", "applicants"
+    Each in turn calls the appropriate Sql file
+    n_[]_ff.sql and returns the count.
+    """
+    day = helpers.eightdigitdate
+    query_file = f"Sql/n_{m_type}_ff.sql"
+    with open(query_file, 'r') as stream:
+        query = stream.read().format(today=day)
+    res = sql.fetch(query, from_file=False)
+    return int(res[0][0])
+
 def in_good_standing(personID):
     """
     Is person with <personID> a member in good standing?
@@ -442,6 +489,11 @@ def ck_update_person_status():
 def ck_add_receipt():
     date = helpers.eightdigitdate
     add_receipt(310, date, 25, category="ap_fee")
+
+def ck_numbers():
+    for m_type in ("active", "first_yr",
+                   "honorary", "inactive"):
+        print(f"There are {data.numbers(m_type)} {m_type} members.")
 
 
 if __name__ == "__main__":

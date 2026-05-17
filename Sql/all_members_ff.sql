@@ -12,7 +12,7 @@ JOIN
 ON
     P.personID = PS.personID
 WHERE
-(PS.statusID in (11, 15, 14, 16, 17))
+     PS.statusID in (11, 15, 14, 16, 17)
 AND (PS.begin = '' OR PS.begin <= '{today}')
 AND (PS.end = '' OR PS.end > '{today}')
 ORDER BY

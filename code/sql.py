@@ -274,6 +274,32 @@ def query2csv(query, fname):
             dictwriter.writerow(mapping)
 
 
+def applicant_mappings():
+    """
+    Uses the "Sql/appl_dates_sponsors_f.sql" query to
+    retrieve a listing of applicant data mappings.
+    """
+    query = sql.import_query(
+            "Sql/appl_dates_sponsors_f.sql")
+    query = query.format(today=helpers.eightdigitdate)
+    apps = sql.dicts_from_query(query, from_file=False,
+                                replace_periods=True)
+
+    return [mapping for mapping in apps] 
+
+def member_mappings():
+    """
+    Uses the "Sql/all_members_ff.sql" query to
+    retrieve a listing of applicant data mappings.
+    """
+    query = sql.import_query(
+            "Sql/all_members_ff.sql")
+    query = query.format(today=helpers.eightdigitdate)
+    membs = sql.dicts_from_query(query, from_file=False,
+                                replace_periods=True)
+    return membs 
+
+
 def execute(cursor, connection, command, params=None):
     try:
         if params:

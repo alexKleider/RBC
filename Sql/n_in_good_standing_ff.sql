@@ -1,4 +1,4 @@
-/*  File: Sql/count_ff.sql
+/*  File: Sql/n_in_good_standing_ff.sql
 Returns current number of active members.
     Requires {today} to be specified twice.
     Suggest code/sql.fetch_d_query() with a dict
@@ -7,7 +7,7 @@ Returns current number of active members.
 
 
 SELECT count(*) FROM Person_Status
-WHERE statusID in (11, 15)
+WHERE statusID = 15
 and (begin = "" OR begin <= "{today}")
 and (end = "" OR end > "{today}")
 ;
