@@ -4,6 +4,41 @@
 
 """
 Code pertaining to creating letters goes here.
+
+Problem of gmail dropping sent emails:
+    If you send messages with a bulk mailing vendor or third party
+affiliates, prevent your emails from being blocked by Gmail.
+Publish an SPF record that includes the IPs of the vendor or affiliates
+which send your messages.
+Sign your messages with a DKIM signature that is associated with your
+domain.  Make sure the domain in the "From:" address matches the domain you're using to authenticate your emails.
+
+
+If you send messages with a bulk mailing vendor or third party
+affiliates, prevent your emails from being blocked by Gmail. 
+Publish an SPF record that includes the IPs of the vendor or
+affiliates which send your messages.
+Sign your messages with a DKIM signature that is associated
+with your domain.
+
+Make sure the domain in the "From:" address matches the domain
+you're using to authenticate your emails. From: alex@kleider.ca
+My IP: 98.97.25.207  or easyDNS's IP4:64.68.200.48
+Set the "Host" or "Name" field to @ (or leave it blank) to apply to
+your root domain.
+
+currently set to:
+    v=spf1 include:easymail.ca ~all
+
+should I change it to 
+    v=spf1 include:easymail.ca IP4:98.97.25.207 ~all   #my IP
+    or
+    v=spf1 include:easymail.ca IP4:64.68.200.48 ~all   #easyDNS's IP
+    or
+    v=spf1 include:easymail.ca IP4:64.68.200.48 Host:@ ~all   #easyDNS's IP
+
+
+From: alex@kleider.ca
 """
 
 try: from code import helpers
@@ -494,9 +529,11 @@ def generate_letter(mapping):
     bcc = mapping["bccs"]
     pass
 
-def append_letter(letter):
-    pass
+def append_letter(mapping):
+    print(
+    "code.letters.append_letter not yet implemented")
 
 if __name__ == "__main__":
     print("Running letters.py")
     print(letter_bodies["for_testing"])
+

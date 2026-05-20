@@ -26,7 +26,7 @@ except ImportError:
 cmds_available = [
     logic.get_person,
     logic.get_sponsors,
-    logic.new_applicant,
+    logic.enter_applicant,
     logic.update_applicant,
     send_emails.test_send,
     ]

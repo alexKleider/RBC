@@ -37,6 +37,7 @@ def entries(mapping,
 def add_info(mapping, *keys,
         header="Add/change values (_ reverses changes)",
         text="Can only change some..."):
+    """ ### already in UI Why is it here???? ### """
     return ui.add_info(mapping, *keys,
                 header=header, text=text)
 
@@ -247,7 +248,10 @@ def create_applicant_entry(mapping):
         sql.fetch(query, from_file=False, commit=True)
 
 def create_person_status_entry(ap_mapping):
-    """ makes entry >> Person_Status table"""
+    """
+    Makes entry >> Person_Status table.
+    Assumes ap_mapping has values for necessary keys.
+    """
     query = f"""INSERT INTO Person_Status (
         personID, statusID, begin)
         VALUES (
@@ -261,12 +265,14 @@ def create_person_status_entry(ap_mapping):
 
 def create_app_receipts_entry(ap_mapping):
     """ makes entry >> Receipts table"""
+    if not ap_mapping["fee_rcvd"]:
+        return
     query = f"""INSERT INTO Receipts (
         personID, date_received, ap_fee, acknowledged)
         VALUES (
         {ap_mapping["personID"]},
         {ap_mapping["app_rcvd"]},
-        {ap_mapping["app_fee"]},
+        {ap_mapping["fee"]},
         {ap_mapping["app_rcvd"]}
         ) ;"""
     if ui.confirm_text(query):

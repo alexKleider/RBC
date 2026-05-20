@@ -161,13 +161,13 @@ def choose(choices,
 def entries(mapping,
             header="Data Entry",
             text="Rtn to leave value as is, '_' to clear..."):
+    ret = {key: val for key, val in mapping.items()}
     while True:
             print("=" * len(header))
             print(header)
             print("=" * len(header))
             print(text)
-            ret = {}
-            for key, value in mapping.items():
+            for key, value in ret.items():
                 if value:
                     entry = input(f"{key}: {value}; New value: ")
                 else:
@@ -176,6 +176,8 @@ def entries(mapping,
                     ret[key] = entry
                     if ret[key] == '_': ret[key] = ''
                 else: ret[key] = value
+            for key, val in ret.items():
+                print(f"{key}: {val}")
             if ok(text="OK with above entries? (y/n) "):
                 return ret
             if not ok(header="Try again?", text="y/n "):
