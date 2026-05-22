@@ -3,12 +3,8 @@
 # File: code/sql.py
 
 """
-Contains some 'helper' code to support SQL(ite3)
-relational data base management.
-Also contains the "funcs" typified by std_mailing_funcs:
-- it's here than "extra[n]" field(s) might be added for
-such things as billing statement or the like.
-*** used to be called "routines.py" ***
+SQL(ite3) helper code.
+Code involving specific queries should be in code/data.py
 """
 
 import os
@@ -273,82 +269,6 @@ def query2csv(query, fname):
 #           _ = input(repr(mapping))
             dictwriter.writerow(mapping)
 
-
-def applicant_mappings():
-    """
-    Uses the "Sql/appl_dates_sponsors_f.sql" query to
-    retrieve a listing of applicant data mappings.
-    """
-    query = sql.import_query(
-            "Sql/appl_dates_sponsors_f.sql")
-    query = query.format(today=helpers.eightdigitdate)
-    apps = sql.dicts_from_query(query, from_file=False,
-                                replace_periods=True)
-
-    return [mapping for mapping in apps] 
-
-def member_mappings():
-    """
-    Uses the "Sql/all_members_ff.sql" query to
-    retrieve a listing of applicant data mappings.
-    """
-    query = sql.import_query(
-            "Sql/all_members_ff.sql")
-    query = query.format(today=helpers.eightdigitdate)
-    membs = sql.dicts_from_query(query, from_file=False,
-                                replace_periods=True)
-    return membs 
-
-
-def execute(cursor, connection, command, params=None):
-    try:
-        if params:
-            cursor.execute(command, params)
-        else:
-            cursor.execute(command)
-    except (sqlite3.IntegrityError, sqlite3.OperationalError):
-        print("Unable to execute following query:")
-        print(command)
-        raise
-#   _ = input(command)
-#   if commit:
-#       connection.commit()
-
-
-def connect_and_get_data(command, db=db_file_name):
-    con = sqlite3.connect(db)
-    cur = con.cursor()
-    cur.execute(command)
-    return cur.fetchall()
-
-
-def connect_and_set_data(command, db=db_file_name):
-    con = sqlite3.connect(db)
-    cur = con.cursor()
-    cur.execute(command)
-    con.commit()
-
-def get_ids_by_name(first, last, db=db_file_name):
-    """
-    Returns People.personID (could be more than one!)
-    for anyone with <first> <last> name.
-    Returns a (possible empty) tuple.
-    Unlikely it'll ever be more than a tuple with one value
-    """
-
-    query = f"""SELECT personID, first, last, suffix from People
-            WHERE People.first = "{first}"
-            AND People.last = "{last}" """
-#   _ = input(query)
-    con = sqlite3.connect(db)
-    cur = con.cursor()
-    execute(cur, con, query)
-    res = cur.fetchall()
-    if not res:
-        _ = input("No key for {} {}".format(first, last))
-    return res
-
-
 def query_keys(query):
     """
     Accepts a <query> and returns keys to the values expected to be
@@ -375,34 +295,58 @@ def query_keys(query):
     keys = nowhitespace.split(',')
     return  [key.replace(".", "_") for key in keys]
 
-def get_people_fields_by_ID(db_file_name=db_file_name,
-                                    fields=None):
+def db2csv(report=None):
     """
-    ## What is this for???
-    Select values of the <fields> columns from the People table.
-    Default (<fields> not specified) is to select all fields.
+    Backs up the data base (Data/club.db) by creating a csv file
+    for each table, putting them all into a separate directory,
+    and then creating a zip file to be backed up on Google Drive.
+    """
+    if not report:
+        report = []
+    tempdir = "TempZIP_Dir"
+    zip_name = f"{helpers.eightdigitdate4filename}_db_as_CSVs"
+    tables = fetch(
+            """SELECT name FROM sqlite_master
+               WHERE type='table';""", from_file=False)
+    tables = [table[0] for table in tables]
+    os.mkdir(tempdir)
+    for table in tables:
+        file_name = tempdir +'/' + f"{table}.csv"
+        keys = keys_from_schema(table)
+        with open(file_name, 'w', newline='') as stream:
+            csv_writer = csv.writer(stream)
+            csv_writer.writerow(keys_from_schema(table))
+            res = fetch(f"SELECT * FROM {table};",
+                    from_file=False)
+            for row in res:
+                csv_writer.writerow(row)
+    archived = shutil.make_archive(zip_name, 'zip', tempdir)
+    report.append("created: " + repr(archived))
+    print(report[-1])
+    shutil. rmtree(tempdir)
+    return report
+
+redact = '''
+## should not all of the following
+## be moved to  code/data.py???
+## none of them appear to be used in code/
+##   reports, logic, or data !!!!!!!!
+
+def dict_from_list(listing, fields):
+    """
+    <listing> is an iterable as might be an element in what's
+    returned by an SQL query.
+    <fields> is an array of (word, integer, ) tuples that
+    determines which entry in the listing is keyed by what
+    <word> in the resulting dict.
     """
     ret = {}
-    query = """SELECT {} FROM People;"""
-    if fields:
-        fields = ["personID", ] + [field for field in fields]
-        var = ', '.join(fields)
-    else: var = '*'
-    query = query.format(var)
-#   _ = input(query)
-    con = sqlite3.connect(db_file_name)
-    cur = con.cursor()
-    execute(cur, con, query.format(var))
-    res = cur.fetchall()
-#   _ = input(res)
-    for entry in res:
-        ret[entry[0]] = entry[1:]
+    for word, i in fields:
+        ret[word] = listing[i]
     return ret
-
-
 def get_demographic_dict(personID):
     """
-    Moved from code/dates.py
+    Wrongly???  Moved from code/dates.py
     If a valid personID is provided returns a dict
     keyed by <keys> (see code below.)
     If invalid personID: returns None
@@ -451,6 +395,51 @@ def get_person_fields_by_ID(personID, fields=None):
     else:
 #       _ = input(res)
         return res
+
+def get_ids_by_name(first, last, db=db_file_name):
+    """
+    Returns People.personID (could be more than one!)
+    for anyone with <first> <last> name.
+    Returns a (possible empty) tuple.
+    Unlikely it'll ever be more than a tuple with one value
+    """
+
+    query = f"""SELECT personID, first, last, suffix from People
+            WHERE People.first = "{first}"
+            AND People.last = "{last}" """
+#   _ = input(query)
+    con = sqlite3.connect(db)
+    cur = con.cursor()
+    execute(cur, con, query)
+    res = cur.fetchall()
+    if not res:
+        _ = input("No key for {} {}".format(first, last))
+    return res
+
+
+def get_people_fields_by_ID(db_file_name=db_file_name,
+                                    fields=None):
+    """
+    ## What is this for???
+    Select values of the <fields> columns from the People table.
+    Default (<fields> not specified) is to select all fields.
+    """
+    ret = {}
+    query = """SELECT {} FROM People;"""
+    if fields:
+        fields = ["personID", ] + [field for field in fields]
+        var = ', '.join(fields)
+    else: var = '*'
+    query = query.format(var)
+#   _ = input(query)
+    con = sqlite3.connect(db_file_name)
+    cur = con.cursor()
+    execute(cur, con, query.format(var))
+    res = cur.fetchall()
+#   _ = input(res)
+    for entry in res:
+        ret[entry[0]] = entry[1:]
+    return ret
 
 
 def get_name(personID):
@@ -536,32 +525,6 @@ def pick_id():
                 if yn and yn[0] in "yY":
                     return int(choice)
 
-
-def get_commands(sql_file):
-    """
-    Assumes <in_file> contains valid SQL commands.
-    i.e. could be read by sqlite> .read <in_file>
-    Yeilds the commands one at a time.
-    Usage:
-        con = sqlite3.connect("sql.db")
-        cur = con.cursor()
-        for command in get_commands(sql_commands_file):
-            cur.execute(command)
-    """
-    with open(sql_file, 'r') as in_stream:
-        command = []
-        for line in in_stream:
-            parts = line.split('--')
-            line = parts[0]
-            line = line.strip()
-            if ((not line)
-            or ((len(line) == 1)
-                and (not line[0] in ';)'))):
-                continue
-            command.append(line)
-            if line.endswith(';'):
-                yield ' '.join(command)
-                command = []
 
 
 people_query = """/* Sql/get_by_ID_f.sql */
@@ -666,551 +629,5 @@ def pick_People_record(header_prompt=None, report=None):
                         "... pick_People_record => a dict.")
                 return rec
 
-
-def dict_from_list(listing, fields):
-    """
-    <listing> is an iterable as might be an element in what's
-    returned by an SQL query.
-    <fields> is an array of (word, integer, ) tuples that
-    determines which entry in the listing is keyed by what
-    <word> in the resulting dict.
-    """
-    ret = {}
-    for word, i in fields:
-        ret[word] = listing[i]
-    return ret
-
-
-def compound_dict_from_query(listings, fields,
-                        key_name_and_index):
-    """
-    The first two params are used to create 
-    """
-    ret = {}
-    for listing in listings:
-        d_from_list = dict_from_list(listing, fields)
-        ret[key_name_and_index[0]] = listing[
-                            key_name_and_index[1]]
-
-def ret_statement(personID, incl0=True):
-    """
-    Returns a (possibly empty) dict.  **
-    Key/value pairs are account (dues, dock, etc)
-    and amount owing (including where value is 0.)
-    ** Returns none if there is no statement 
-    i.e. if not a member!
-    """
-    source_files = {
-            # the following files all check for membership.
-            # hence the 'f' for formatted by
-            # helpers.eightdigitdate
-            # the "0" indicates that zero balances are included
-            'dues': "Sql/dues0_f_byID.sql",
-            'dock': "Sql/dock0_f_byID.sql",
-            'kayak': "Sql/kayak0_f_byID.sql",
-            'mooring': "Sql/mooring0_f_byID.sql",
-            }
-    ret = {"total": 0, }
-    total = 0
-    entry = False
-    for key in source_files.keys():
-        query = import_query(source_files[key])
-        query = query.format(helpers.eightdigitdate,
-                             helpers.eightdigitdate)
-        query = query.format(personID)
-        res = fetch(query, from_file=False)
-        if res:
-            amnt = res[0][0]
-            if len(res)>1:
-                assert(False), 'Error in routines.ret_statement.'
-            ret[key] = amnt
-            total += amnt
-            entry = True
-    if entry:
-        ret['total'] = total
-        return ret  # a dict possibly with only one (total) entry.
-    else:  # No statement
-        return
-
-def get_data4statement(personID):  ## 2B REDACTED
-    """
-    Returns a dict keyed by the following:
-    personID, first, last, suffix,
-    address, town, state, postal_code, country,
-    email, dues_owed
-    and if applicable:
-    dock, kayak, mooring.
-    If no result from the query: returns an empty dict.
-    """
-    data = {'personID': personID,
-            }
-    res = fetch("Sql/demographics_by_ID.sql",
-                    params=(personID, ) )[0]
-    data['first'] = res[0]
-    data['last'] = res[1]
-    data['suffix'] = res[2]
-    data['address'] = res[3]
-    data['town'] = res[4]
-    data['state'] = res[5]
-    data['postal_code'] = res[6]
-    data['country'] = res[7]
-    data['email'] = res[8]
-    data2add = ret_statement(personID)
-    for key in data2add.keys():
-        data[key] = data2add[key]
-    return data
-
-
-def add_statement_data(person_data):  ## 2 replace get_data4s
-    """
-    Returns ** a _new_ dict (helpers.Class Rec) with keys
-    and values of person_data AND 
-    dues_owed and if applicable: dock, kayak, mooring.
-    ** Returns none if no new data is added.
-    """
-    ret = helpers.Rec(person_data)
-    data2add = ret_statement(person_data['personID'])
-    if data2add:
-        for key in data2add.keys():
-            ret[key] = data2add[key]
-        return ret
-
-
-def get_statement(data, include_header=True):
-    """
-    <data> is a dict returned by add_statement_data.
-    Returns a multiline string: a statement of what's owed
-    as reflected in the .
-        "Currently owing" (dues, dock, kayak, mooring),
-        and "total" keys of <data>.
-    """
-    if include_header: owing = ["Currently owing:", ]
-    else: owing = []
-    keys = set(data.keys())
-#   for key, value in data.items():   # 2delete 3lines
-#       print(f"{key}: {value}")
-#   _ = input('Check the above for a "dues" key')
-    owing.append(    f"  Dues owing..... {data['dues']:>3}")
-    if "dock" in keys:
-        owing.append(f"  Dock usage..... {data['dock']:>3}")
-    if "kayak" in keys:
-        owing.append(f"  Kayak storage.. {data['kayak']:>3}")
-    if "mooring" in keys:
-        owing.append(f"  Mooring fee.... {data['mooring']:>3}")
-    owing.append(f"Total... ${data['total']}")
-    return '\n'.join(owing)
-
-def get_owing(holder):
-    """
-    Assigns holder.working_data dict:
-    Retrieve personID for each member who owes
-    putting their relevant data into holder.working_data:
-    a dict keyed by ID.
-    """
-    byID = dict()  # to be assigned to holder.working_data
-    res = fetch('Sql/dues0')
-
-
-def assign_mannually(holder):
-    """
-    Assigns holder.working_data to an empty dict
-    and then prompts user to add entries.
-    Used to assign recipients of mailing.
-    """
-    holder.working_data = {}
-    while True:
-        rec = pick_People_record(
-                header_prompt="Selecting a record...")
-        if rec:
-            holder.working_data[rec['personID']] = rec
-        else:
-            response = input("Done with entries? (y/n) ")
-            if response and response[0] in 'yY':
-                break
-
-def add_sponsors2holder_data(holder):
-    """
-    Adds sponsorIDs (if they exist) to all the records
-    in holder.working_data (which is People table data
-    keyed by personID.
-    Note: adds sponsorIDs, not names
-    """
-    query = "SELECT * from Applicants where personID = {};"
-    ap_keys = keys_from_schema("Applicants")
-    for key in holder.working_data.keys():
-        res = fetch(query.format(key), from_file=False)
-        if res:
-            ap_dict = helpers.make_dict(ap_keys, res[0])
-            for sponsor in ("sponsor1ID", "sponsor2ID"):
-                holder.working_data[key][sponsor] = (
-                        ap_dict[sponsor])
-        else:
-            for sponsor in ("sponsor1ID", "sponsor2ID"):
-                holder.working_data[key][sponsor] = ''
-
-
-def assign_owing(holder):
-    """
-    """
-    query_file = "Sql/statements.sql"
-    keys = ("ID", "last", "first", "suffix",
-        "email", "address", "town", "state",
-        "postal_code", "country",
-        "dues", "dock", "kayak", "mooring",)
-    dicts = query2dict_listing(query_file,
-            keys=keys, from_file=True)
-    byID = dict()
-    for d in query2dict_listing(query_file,
-            keys=keys, from_file=True):
-        total = 0
-        for key in ("dues", "dock", "kayak", "mooring"):
-            if not d[key]:
-                d[key] = 0
-            else:
-                d[key] = int(d[key])
-                total += d[key]
-        d['total'] = total
-        byID[d["ID"]] = d
-    holder.working_data = byID
-    return byID
-
-
-def assign_inductees4payment(holder):
-    """
-    Assigns holder.working_data dict keyed by ID pertaining
-    to those recently inducted and yet to be notified.
-    REFACTOR to use add_sponsor_cc2data ??already done??
-    Used with members.inductee_payment
-    """
-    byID = dict()
-    res = fetch('Sql/inducted.sql')
-    keys = ("personID last first suffix phone address town state"
-    + " postal_code email sponsor1ID sponsor2ID begin end")
-    ## sponsor1 and sponsor2 are IDs!!
-    keys = keys.split()
-    # Now get the sponsors...
-    query = """SELECT last, first, suffix, email FROM People
-            WHERE personID = {};"""  # returns a one entry list
-    sponsor_keys = "last first suffix email"
-    for line in res:  # what's collected by Sql/inducted.sql
-        data = helpers.make_dict(keys[:],
-                line[:])
-        data['cc'] = []
-        data['sponsor1'] = helpers.make_dict(
-                sponsor_keys.split(),
-                fetch(query.format(data['sponsor1ID']),
-                from_file=False)[0])  # '[0]' is to get first
-                                    # of a one entry list
-        if data['sponsor1']['email']:
-            data['cc'].append(data['sponsor1']['email'])
-        data['sponsor2'] = helpers.make_dict(sponsor_keys.split(),
-                fetch(query.format(data['sponsor2ID']),
-                from_file=False)[0])
-        if data['sponsor2']['email']:
-            data['cc'].append(data['sponsor2']['email'])
-        data['cc'] = ','.join((data['cc']))
-        byID[line[0]] = data
-    holder.working_data = byID
-
-def getIDs_by_status(statusID):
-    query = import_query(
-        "Sql/ids_by_status_f.sql").format(
-            statusID, helpers.eightdigitdate)
-    res = fetch(query, from_file=False)
-    return [entry[0] for entry in res]
-
-
-def add_sponsorIDs(data):
-    """
-    <data> is a dict assumed to have fields sponsor1 & sponsor2.
-    Returns data with fields sponsor1ID and sponsor2ID.
-    Modifies data (passed by reference since it's mutable.
-    """
-    for spName, spID in (('sponsor1', 'sponsor1ID'),
-                        ('sponsor2', 'sponsor2ID'),):
-        while True:
-            res = pick_People_record(header_prompt=
-                            f'Listed sponsor is: {data[spName]}')
-            to_show = (
-                    "{personID} {first} {last} {suffix}"
-                        .format(**res))
-            yn = input(f"Accept {to_show}? y/n: ")
-            if yn and yn[0] in yn:
-                data[spID] = res['personID']
-                break
-
-def add_sponsors2data(data):
-    """
-    <data> is a record/dict
-    If it has <sponsor[1,2]ID key then
-    We add <sponsor[1,2]> keys the value of each containing
-    a record of first, last, suffix, email of each sponsor.
-    Note: the sponsor may not have email.
-    """
-    applicantID = data["personID"]
-    sponsorIDs = fetch("""
-        SELECT sponsor1ID, sponsor2ID FROM Applicants
-        WHERE personID = ?; """,
-        params=(applicantID,), from_file=False)
-    sponsors = []
-    sponsor_keys = 'first, last, suffix, email'.split(', ')
-    for sponsorID in sponsorIDs[0]:
-#       _ = input(f"sponsorID: {sponsorID}")
-        sponsor = fetch("""
-        SELECT first, last, suffix, email FROM People
-        WHERE personID = ? AND notified = '';""",
-        params=(sponsorID,), from_file=False)
-        sponsors.append(dict_from_list(sponsor, sponsor_keys))
-    data['sponsor1ID'] = sponsorIDs[0][0]
-    data['sponsor2ID'] = sponsorIDs[0][1]
-    data['sponsor1'] = sponsors[0]
-    data['sponsor2'] = sponsors[1]
-    return data
-
-
-def add_sponsor_data(data):
-    """
-    <data> is a record, its first field is personID.
-    Added are the following fields:
-        sponsor1ID, sponsor2ID, sponsor1, sponsor2
-    sponsor[1/2] are records of first, last, suffix, email
-    the email field possibly being empty.
-    """
-    sponsorIDs = fetch("""
-        SELECT sponsor1ID, sponsor2ID FROM Applicants
-        WHERE personID = ?; """,
-        params=(data['personID'],), from_file=False)
-    sponsors = []
-    sponsor_keys = "first, last, suffix, email".split(', ')
-    data['sponsor1ID'] = sponsorIDs[0][0]
-    data['sponsor2ID'] = sponsorIDs[0][1]
-    res = fetch("""
-            SELECT first, last, suffix, email FROM People
-            WHERE personID = ?""",
-            params=(sponsorIDs[0][0],), from_file=False)
-#   print(f"{res}")
-#   _ = input(f"{sponsor_keys}")
-    data['sponsor1'] = helpers.make_dict(sponsor_keys, res[0])
-    res = fetch("""
-            SELECT first, last, suffix, email FROM People
-            WHERE personID = ?""",
-            params=(sponsorIDs[0][1],), from_file=False)
-    data['sponsor2'] = helpers.make_dict(sponsor_keys, res[0])
-
-
-def get_sponsors(applicantID):
-    sponsorIDs = fetch("""
-        SELECT sponsor1, sponsor2 FROM Applicants
-        WHERE personID = ?; """,
-        params=(applicantID,), from_file=False)
-    sponsors = []
-    for sponsorID in sponsorIDs[0]:
-#       _ = input(f"sponsorID: {sponsorID}")
-        sponsors.append(fetch("""
-        SELECT first, last, suffix, email FROM People
-        WHERE personID = ?""",
-        params=(sponsorID,), from_file=False))
-    return sponsors
-
-
-def add_sponsor_cc2data(data):
-    """
-    <data> must be a dict with sponsor1ID and sponsor2ID keys
-    who's values are personIDs. 
-    A data['cc'] entry is created as a string with sponsor
-    emails separated by commas. The string could be empty
-    if sponsors don't have email.
-    """
-    query = """SELECT last, first, suffix, email FROM People
-            WHERE personID = {};"""  # returns a one entry list
-    sponsor_keys = "last first suffix email"
-    data['cc'] = []
-    for sponsor in ('sponsor1ID', 'sponsor2ID'):
-        sponsor_dict = helpers.make_dict(sponsor_keys.split(),
-            fetch(query.format(data[sponsor]),
-                from_file=False)[0])  # '[0]' is to get first
-                                    # of a one entry list
-        if sponsor == 'sponsor1ID':
-            data['sponsor1'] = sponsor_dict
-        if sponsor == 'sponsor2ID':
-            data['sponsor2'] = sponsor_dict
-        if sponsor_dict['email']:
-            data['cc'].append(sponsor_dict['email'])
-    data['cc'] = ','.join(data['cc'])
-
-
-def assign_applicant_fee_pending(holder):
-#   assignees = getIds_by_status(1)
-    query = import_query("Sql/applicants_of_status_ff.sql")
-    query = query.format(1, helpers.eightdigitdate)
-    res = fetch(query, from_file=False)
-    keys = ("personID, last, first, suffix, phone, " +
-        "address, town, state, postal_code, email, " +
-        "sponsor1ID, sponsor2ID, app_rcvd, fee_rcvd, " +
-        "meeting1, meeting2, meeting3, approved, " +
-        "dues_paid, notified, begin, end").split(', ')
-    listing = []
-    byID = {}
-    for entry in res:
-        mapping = dict(zip(keys, entry))
-        listing.append(mapping)
-        byID[entry[0]] = mapping
-    holder.working_data = byID
-
-def assign_just_me(holder):
-    query = """SELECT * FROM People WHERE
-            first = "Alex" AND last = "Kleider";"""
-    res = fetch(query, from_file=False)
-    keys = keys_from_schema("People")
-    listing = []
-    byID = {}
-    for entry in res:
-        mapping = dict(zip(keys, entry))
-        listing.append(mapping)
-        byID[entry[0]] = mapping
-    holder.working_data = byID
-
-def assign_applicants2welcome(holder):
-#   assignees = getIds_by_status(2)
-    query = import_query("Sql/applicants_of_status_ff.sql")
-    query = query.format(2, helpers.eightdigitdate)
-    res = fetch(query, from_file=False)
-    keys = ("personID, last, first, suffix, phone, " +
-        "address, town, state, postal_code, email, " +
-        "sponsor1ID, sponsor2ID, app_rcvd, fee_rcvd, " +
-        "meeting1, meeting2, meeting3, approved, " +
-        "dues_paid, notified, begin, end").split(', ')
-    listing = []
-    byID = {}
-    for entry in res:
-        mapping = dict(zip(keys, entry))
-        listing.append(mapping)
-        byID[entry[0]] = mapping
-    holder.working_data = byID
-    print("Now need to update applicant's status from 2 > 3.")
-
-
-def assign_welcome2full_membership(holder):
-    ret = ['<welcome to full_membership mailing>',
-            ]
-    print("Create list of people to welcome as new member(s):")
-    candidates_byID = {}
-    while True:
-        candidate = pick_People_record("Pick a person...")
-        if not candidate:
-            break
-        else:
-            candidates_byID[candidate['personID']] = candidate
-    if not candidates_byID:  # nothing to do
-        ret.append("No candidate(s) specified. Nothing to do.")
-        return ret
-    for ID in candidates_byID.keys():
-        add_sponsor_data(candidates_byID[ID])
-    holder.working_data = candidates_byID
-    add_sponsors2holder_data(holder)
-    return ret
-
-
-def db2csv(report=None):
-    """
-    Backs up the data base (Data/club.db) by creating a csv file
-    for each table, putting them all into a separate directory,
-    and then creating a zip file to be backed up on Google Drive.
-    """
-    if not report:
-        report = []
-    tempdir = "TempZIP_Dir"
-    zip_name = f"{helpers.eightdigitdate4filename}_db_as_CSVs"
-    tables = fetch(
-            """SELECT name FROM sqlite_master
-               WHERE type='table';""", from_file=False)
-    tables = [table[0] for table in tables]
-    os.mkdir(tempdir)
-    for table in tables:
-        file_name = tempdir +'/' + f"{table}.csv"
-        keys = keys_from_schema(table)
-        with open(file_name, 'w', newline='') as stream:
-            csv_writer = csv.writer(stream)
-            csv_writer.writerow(keys_from_schema(table))
-            res = fetch(f"SELECT * FROM {table};",
-                    from_file=False)
-            for row in res:
-                csv_writer.writerow(row)
-    archived = shutil.make_archive(zip_name, 'zip', tempdir)
-    report.append("created: " + repr(archived))
-    print(report[-1])
-    shutil. rmtree(tempdir)
-    return report
-
-def exercise_get_person_fields_by_ID(id_n):
-    print(get_person_fields_by_ID(id_n,
-            fields = ('first', 'last', 'suffix')))
-
-def exercise_getIDs_by_status(statusID):
-    print(getIDs_by_status(statusID))
-
-def exercise_assign_applicants2welcome():
-    holder = dict()
-    for entry in assign_applicants2welcome(holder):
-        print(entry)
-
-def exercise_add_sponsor_cc2data():
-    data = {'sponsor1': 4,
-            'sponsor2': 89,
-            }
-    add_sponsor_cc2data(data)
-    for key, value in data.items():
-        print(f"{key}: {value}")
-
-def exercise_pick_People_record():
-    while True:
-        res = pick_People_record(
-            header_prompt="Exercising pick_People_record")
-        print(f"{res}")
-
-
-def exercise_keys_from_schema():
-    for schema in ("People", "Person_Status", "Stati",
-            "Attrition", "Applicants", "Receipts", "Dues",
-            "Moorings", "Dock_Privileges", "Kayak_Slots" ):
-        print(f"{schema}: " +
-            f"{repr(keys_from_schema(schema))}")
-
-def exercise_add_sponsorIDs():
-    data = dict(sponsor1= "Alex Kleider some date",
-                sponsor2= "June Kleider some other date",
-                )
-    add_sponsorIDs(data)
-    print(f"new data: {repr(data)}")
-
-def test_id_by_name():
-    """
-    pick_id is a refinement on id_by_name
-    """
-    while True:
-        # exit using ^D
-        print()
-        choice = pick_id()
-        if choice:
-            print(f"You chose #{choice}")
-        else:
-            print("No ID returned")
-
-def ck_looseSQLcomments():
-    f_name = "/home/alex/Git/RBC/Sql/appl_w_sponsors_f.sql"
-    clean_f = "clean_" + f_name.split("/")[-1]
-    with open(f_name, 'r') as f:
-        query = f.read()
-    clean_query = looseSQLcomments(query)
-    with open(clean_f, "w") as outf:
-        outf.write(clean_query)
-    print(f"See {clean_f} to comapre with {f_name}.")
-
-if __name__ == '__main__':
-    ck_looseSQLcomments()
-#   print(keys_from_schema("People", (1,4)))
-#   db2csv()
-    pass
-
-
+'''
 

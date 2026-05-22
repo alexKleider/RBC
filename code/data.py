@@ -86,8 +86,7 @@ def get_mappings(which_type):
                                replace_periods=True)
     return [mapping for mapping in res]
 
-redact = '''
-def applicant_mappings():
+def applicant_mappings():  # ?not used/redact? #
     """
     Uses the "Sql/appl_dates_sponsors_f.sql" query to
     retrieve a listing of applicant data mappings.
@@ -99,7 +98,19 @@ def applicant_mappings():
                                 replace_periods=True)
 
     return [mapping for mapping in apps] 
-'''
+
+def member_mappings():
+    """
+    Uses the "Sql/all_members_ff.sql" query to
+    retrieve a listing of applicant data mappings.
+    """
+    query = sql.import_query(
+            "Sql/all_members_ff.sql")
+    query = query.format(today=helpers.eightdigitdate)
+    membs = sql.dicts_from_query(query, from_file=False,
+                                replace_periods=True)
+    return membs 
+
 
 def numbers(m_type):
     """
@@ -392,33 +403,6 @@ def get_all_app_info():
                      replace_periods=True)
     return ret
 
-def ck_get_all_app_info():
-    mappings = [map_ for map_ in get_all_app_info()]
-    res = ["Applicants",]
-    res.append("="*len(res[:-1]))
-    for mg in mappings:
-        listing = []
-        line1 = "    [{A_personID:>3}] {A_first} {A_last}"
-        if mg["A_suffix"]: line1 = line1 + "{A_suffix}"
-        line1 = line1 + "  {A_email}"
-        line1p = " {A_phone}"
-        line = line1+line1p
-        if len(line) > 70:
-            line = line1 + line1e
-            n = len(line)
-            listing.append(line)
-            listing.append(" "*(70-len(line)) + linep)
-        else:
-            listing.append(line)
-        entry = '\n'.join(listing)
-        _ = input(entry)
-        text2add = entry.format(**mg)
-        _ = input(text2add)
-        listing.append("")
-
-
-def update_applicant(mapping):
-    pass
 
 def get_highest_ID():
     """
@@ -428,22 +412,6 @@ def get_highest_ID():
             ORDER BY personID DESC LIMIT 1;"""
     res = sql.fetch(query, from_file=False)
     return res[0][0]
-
-def ck_get_app_info():
-    mapping = get_app_info(249)
-    if mapping:
-        for key, value in mapping.items():
-            print(f"{key}: {value}")
-    else:
-        print("?Aborted?")
-
-def ck_app_queries():
-    query_w_ID = app_query_byID.format(250)  # single mapping
-    _ = input(query_w_ID)
-    all_app_query = partial_app_query + ";"  # mappings of...
-                                            # ...all applicants
-    _ = input(all_app_query)
-    _ = input(len(all_app_query))
 
 def show_all_app_info():
     """
@@ -479,6 +447,46 @@ def show_all_app_info():
         listing.append("")
         ret.extend(listing)
     return ret
+
+def ck_get_all_app_info():
+    mappings = [map_ for map_ in get_all_app_info()]
+    res = ["Applicants",]
+    res.append("="*len(res[:-1]))
+    for mg in mappings:
+        listing = []
+        line1 = "    [{A_personID:>3}] {A_first} {A_last}"
+        if mg["A_suffix"]: line1 = line1 + "{A_suffix}"
+        line1 = line1 + "  {A_email}"
+        line1p = " {A_phone}"
+        line = line1+line1p
+        if len(line) > 70:
+            line = line1 + line1e
+            n = len(line)
+            listing.append(line)
+            listing.append(" "*(70-len(line)) + linep)
+        else:
+            listing.append(line)
+        entry = '\n'.join(listing)
+        _ = input(entry)
+        text2add = entry.format(**mg)
+        _ = input(text2add)
+        listing.append("")
+
+def ck_get_app_info():
+    mapping = get_app_info(249)
+    if mapping:
+        for key, value in mapping.items():
+            print(f"{key}: {value}")
+    else:
+        print("?Aborted?")
+
+def ck_app_queries():
+    query_w_ID = app_query_byID.format(250)  # single mapping
+    _ = input(query_w_ID)
+    all_app_query = partial_app_query + ";"  # mappings of...
+                                            # ...all applicants
+    _ = input(all_app_query)
+    _ = input(len(all_app_query))
 
 def ck_show_all_app_info():
     app_file = "applicants.txt"

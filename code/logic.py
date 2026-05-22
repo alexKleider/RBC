@@ -218,8 +218,7 @@ def add_sponsors(applicant):
           "meeting1": "",
                   }
     ret = applicant | ap_mapping 
-    helpers.dump2json(person,
-                      "A_sponsors_incl.json")
+    helpers.dump2json(ret, "A_sponsors_incl.json")
     return ret
 
 def add_dates(applicant):
