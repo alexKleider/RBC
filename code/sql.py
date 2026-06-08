@@ -45,21 +45,24 @@ note2self = """
 https://www.kdnuggets.com/partial-functions-in-python-a-guide-for-developers
 """
 
-def fetch(sql_source, db=db_file_name, params=None, data=None,
-                    from_file=True, commit=False,
-                    verbose=False):
+def fetch(sql_source, db=db_file_name, params=None,
+          data=None, from_file=True, commit=False,
+          verbose=False):
     """
-    <sql_source> must be a string: either the name of a file
-    containing a valid sqlite3 query or (if <from_file> is set
-    to False) the query itself. The query is executed on the <db>.
-    Only one (if any) of the following should be provided:
-        <params> must be an iterable of length to match number
-            of qmark placeholders in the query. Remember to use
-            the '%' character as a suffix (or prefix or both.)
-        <data> must be a dict with all keys necessary to match
-            all place holders in the query. Remember place holder
-            names are prefaced by a colon in the query.
-            eg: (:key1, :key2).
+    <sql_source> must be a string: either the name of
+    a file containing a valid sqlite3 query or (if
+    <from_file> is set to False) the query itself.
+    The query is executed on the <db>.
+    Only one (if any) of the following should be
+    provided:
+        <params> must be an iterable of length
+    to match number of qmark placeholders in the query.
+    Remember to use the '%' character as a suffix (or
+    prefix or both.)
+        <data> must be a dict with all keys necessary to
+    match all place holders in the query. Remember place
+    holder names are prefaced by a colon in the query.
+    eg: (:key1, :key2).
     Be aware that the query might return an empty list.
     """
     if from_file:
@@ -68,6 +71,7 @@ def fetch(sql_source, db=db_file_name, params=None, data=None,
 #       _ = input(f"### Query begins next line\n{query}")
     else: query = sql_source
     if verbose:
+        pass
         print("Query being called is...")
         _ = input(query)
     db, cur = initDB(db)
@@ -101,9 +105,9 @@ def import_query(sql_file_name):
 
 def fetch_d_query(sql_file_name, data, commit=False):
     """
-    Assumes <sql_file_name> is a file containting an SQL query
-    with place holders keyed by key/value pairs available
-    in <data>, a dict.
+    Assumes <sql_file_name> is a file containting an
+    SQL query with place holders keyed by key/value
+    pairs available in <data>, a dict.
     """
     query = import_query(sql_file_name)
     query = query.format(**data)
@@ -195,7 +199,6 @@ def dicts_from_query(query, from_file=False,
     if from_file:
         with open(query, 'r') as q_file:
             query = q_file.read()
-#   print(f"in dicts_from_query, query is\n{query}")
     if not keys:
         keys = keys_from_query(query,
                        replace_periods=replace_periods)
@@ -222,6 +225,7 @@ def query2dict_listing(query, keys=False,
     ret = []
     if not keys:
         keys = keys_from_query(query)
+#   _ = input(f"query2dict_listing param is\n{query}")
     res = fetch(query, from_file=from_file)
     for entry in res:
         d = dict(zip(keys, entry))
@@ -326,7 +330,6 @@ def db2csv(report=None):
     shutil. rmtree(tempdir)
     return report
 
-redact = '''
 ## should not all of the following
 ## be moved to  code/data.py???
 ## none of them appear to be used in code/
@@ -534,24 +537,44 @@ like_query = """
         SELECT * FROM People WHERE {};
         """
 
-def get_rec_by_ID(ID):
+def get_rec_by_ID(id_, keys=None):
     """
     Returns a record corresponding to personID if record
     exists, otherwise returns None
     (Client is pick_People_record)
+    ## Note: still need to add code to restrict
+    keys provided. Currently keys param is ignored.
+    See code/data.py get_person
     """
-    res = fetch(people_query.format(ID), from_file=False)
-#   _ = input(res)
-    if not res:
-        return
-    ret = helpers.make_dict(
-            keys_from_schema("People"), res[0])
-#                               from_file=False)
+    if not keys: listing = "*"
+    else: 
+        ks = keys.split(", ")
+        listing = []
+        listing = [f"{k}" for k in ks]
+        listing = ", ".join(listing)
+    query = f"""SELECT {listing}
+        FROM People WHERE
+        personID = {id_}
+        ;"""
+#   print(query)
+    ret = [res for res in query2dict_listing(query)]
     if not ret:
+        announce(
+            "Must have entered an invalid personID!!")
         return
-    else:
-        return ret
+    if len(ret) > 1:
+        announce(
+            "get_person(id) should not return >1!!")
+        return
+    return ret[0]
 
+def get_applicant(personID):
+    """ Returns data from People & Applicant tables"""
+    query = import_query("Sql/app_w_dates_f.sql"
+            ).format(personID)
+#   _ = input(f"query is {query}")
+    ret = dicts_from_query(query, replace_periods=True)
+    return next(ret)
 
 def pick_People_record(header_prompt=None, report=None):
     """
@@ -629,5 +652,19 @@ def pick_People_record(header_prompt=None, report=None):
                         "... pick_People_record => a dict.")
                 return rec
 
-'''
+def ck_pick_People_record():
+    person = pick_People_record(
+            header_prompt="Select a person")
+    if person:
+        for key, val in person.items():
+            print(f"{key}: {val}")
+    else:
+        print("Unable to find your person!")
+
+def ck_get_applicant():
+    print(get_applicant(249))
+
+if __name__ == "__main__":
+#   ck_pick_People_record()
+    ck_get_applicant()
 

@@ -276,6 +276,7 @@ def send2file(listing, test_file=None):
     report = "\n".join(listing)
     with open(test_file, "w") as outf:
         outf.write(report)
+        print("",file=outf)
     print(f"Output sent to '{test_file}'.")
 
 def ck_member_listing():
@@ -290,6 +291,6 @@ def ck_headers():
 
 if __name__ == "__main__":
 #   send2file(applicant_report(), "4app.txt")
-#   send2file(exec_report(), "4exec.txt")
-    send2file(forWeb(), "4web.txt")
+    send2file(exec_report(), "4exec.txt")
+#   send2file(forWeb(), "4web.txt")
 

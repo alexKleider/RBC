@@ -8,21 +8,15 @@ Provides interface to data base via the sql.py module.
 (Lowest level, so no imports from local code
 except helpers (to get eightdigit date which
 is only used for testing.)
-Uses sqlite2 via sql.py module.
+Uses sqlite3 via sql.py module.
 """
 
-try:
-    import cli as ui
-except ImportError:
-    from code import cli as ui
-try:
-    import sql
-except ImportError:
-    from code import sql
-try:
-    import helpers
-except ImportError:
-    from code import helpers
+try: import cli as ui
+except ImportError: from code import cli as ui
+try: import sql
+except ImportError: from code import sql
+try: import helpers
+except ImportError: from code import helpers
 
 
 def announce(header="Note the following...",
@@ -189,28 +183,12 @@ def get_person(personID, keys=None):
     (using format: "key1, key2, key3")
     or all values if not <keys>
     Fails if given a non valid <personID>.
+    See code.sql.get_rec_by_ID()
     """
-    if not keys: listing = "*"
-    else: 
-        ks = keys.split(", ")
-        listing = []
-        listing = [f"{k}" for k in ks]
-        listing = ", ".join(listing)
-    query = f"""SELECT {listing}
-        FROM People WHERE
-        personID = {personID}
-        ;"""
-#   print(query)
-    ret = [res for res in sql.query2dict_listing(query)]
-    if not ret:
-        announce(
-            "Must have entered an invalid personID!!")
-        return
-    if len(ret) > 1:
-        announce(
-            "get_person(id) should not return >1!!")
-        return
-    return ret[0]
+    return sql.get_rec_by_ID(personID, keys=None)
+
+def get_applicant(personID):
+    return sql.get_applicant(personID)
 
 def person_keys():
     """

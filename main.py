@@ -6,22 +6,16 @@
 Driver program for Bolinas Rod & Boat Club data management.
 """
 
-try:
-    from code import cli as ui
-except ImportError:
-    import cli as ui
-try:
-    from code import helpers
-except ImportError:
-    import helpers
-try:
-    import logic
-except ImportError:
-    from code import logic
-try:
-    from code import send_emails
-except ImportError:
-    import send_emails
+try: from code import cli as ui
+except ImportError: import cli as ui
+try: from code import helpers
+except ImportError: import helpers
+try: import logic
+except ImportError: from code import logic
+try: from code import send_emails
+except ImportError: import send_emails
+try: from code import ck_data
+except ImportError: import ck_data
 
 cmds_available = [
     logic.get_person,
@@ -29,6 +23,7 @@ cmds_available = [
     logic.enter_applicant,
     logic.update_applicant,
     send_emails.test_send,
+    ck_data.check_consistency_report,
     ]
 
 def main():

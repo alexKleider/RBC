@@ -4,6 +4,8 @@
 
 """
 Accepts a csv file and makes it look better.
+Perhaps this should be made into a function
+and moved into ==> helpers
 """
 
 import sys

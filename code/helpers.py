@@ -1057,7 +1057,7 @@ def send2file(text, filename, silent=False):
         text = '\n'.join(text)
     with open(filename, 'w') as stream:
         stream.write(text)
-    if not silent:
+    if silent:
         print(f"... write to {filename} successfull.")
 
 
@@ -1242,7 +1242,7 @@ def compare_dicts(d1, d2,
     return '\n'.join(ret)
 
 
-def main():
+def main2():
     print("The month is '{}'.".format(month))
     print("'helpers.get_datestamp() returns '{}'."
           .format(date))
@@ -1455,7 +1455,7 @@ def choose_and_run(proto_menu,
             continue  # if choice > number of choices
 
 
-def main():
+def main1():
     print(timestamp)
 #   choose_and_run(proto_menu)
 #   test_present_listing4approval()
@@ -1534,7 +1534,8 @@ if __name__ == "__main__":
 #   ck_date4letter()
 #   ck_dump_load_json()
 #   ck_dump2json()
-#   main()
+#   main1()
+#   main2()
 #   test_Rec()
 #   ck_date_entry()
 #   print(f"today: {today}")

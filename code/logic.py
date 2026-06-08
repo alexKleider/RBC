@@ -209,16 +209,18 @@ def add_sponsors(applicant):
           "s1_first": sponsors["s1_first"],
           "s1_last": sponsors["s1_last"],
           "s1_suffix": sponsors["s1_suffix"],
+          "s1_email": sponsors["s1_email"],
           "s2_ID": sponsors["s2_personID"],
           "s2_first": sponsors["s2_first"],
           "s2_last": sponsors["s2_last"],
           "s2_suffix": sponsors["s2_suffix"],
+          "s2_email": sponsors["s2_email"],
           "app_rcvd": "",
           "fee_rcvd": "",
           "meeting1": "",
                   }
     ret = applicant | ap_mapping 
-    helpers.dump2json(ret, "A_sponsors_incl.json")
+    helpers.dump2json(ret, "B_sponsors_incl.json")
     return ret
 
 def add_dates(applicant):
@@ -318,12 +320,14 @@ def update_applicant(id_=None):
         rec = get_person()
         id_ = rec["personID"]
     if not id_: return
-    mapping = get_person_table_entry(id_)
+    mapping = data.get_applicant(id_)
     ret = {}
     keys = ["A_personID", "A_first", "A_last", "A_suffix",
         "AP_meeting1", "AP_meeting2", "AP_meeting3",
         "AP_approved", "AP_dues_paid", "AP_notified", ]
     date_keys = keys[4:]
+#   _ = input(f" date keys: {date_keys}")
+#   _ = input(f" mapping: {mapping}")
     date_slot = None
     for date_key in date_keys:
         if not mapping[date_key]:
