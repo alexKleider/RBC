@@ -16,12 +16,17 @@ try: from code import send_emails
 except ImportError: import send_emails
 try: from code import ck_data
 except ImportError: import ck_data
+try: from code import people
+except ImportError: import people
+try: from code import applicants
+except ImportError: import applicants
+
 
 cmds_available = [
-    logic.get_person,
-    logic.get_sponsors,
-    logic.enter_applicant,
-    logic.update_applicant,
+    people.get_person,
+    applicants.get_sponsors,
+    applicants.enter_applicant,
+    applicants.update_applicant,
     send_emails.test_send,
     ck_data.check_consistency_report,
     ]
