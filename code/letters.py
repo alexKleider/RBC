@@ -6,39 +6,26 @@
 Code pertaining to creating letters goes here.
 
 Problem of gmail dropping sent emails:
-    If you send messages with a bulk mailing vendor or third party
-affiliates, prevent your emails from being blocked by Gmail.
-Publish an SPF record that includes the IPs of the vendor or affiliates
-which send your messages.
-Sign your messages with a DKIM signature that is associated with your
-domain.  Make sure the domain in the "From:" address matches the domain you're using to authenticate your emails.
-
-
-If you send messages with a bulk mailing vendor or third party
-affiliates, prevent your emails from being blocked by Gmail. 
-Publish an SPF record that includes the IPs of the vendor or
-affiliates which send your messages.
-Sign your messages with a DKIM signature that is associated
-with your domain.
-
-Make sure the domain in the "From:" address matches the domain
-you're using to authenticate your emails. From: alex@kleider.ca
-My IP: 98.97.25.207  or easyDNS's IP4:64.68.200.48
-Set the "Host" or "Name" field to @ (or leave it blank) to apply to
-your root domain.
-
-currently set to:
-    v=spf1 include:easymail.ca ~all
-
-should I change it to 
-    v=spf1 include:easymail.ca IP4:98.97.25.207 ~all   #my IP
-    or
-    v=spf1 include:easymail.ca IP4:64.68.200.48 ~all   #easyDNS's IP
-    or
-    v=spf1 include:easymail.ca IP4:64.68.200.48 Host:@ ~all   #easyDNS's IP
-
+    If you send messages with a bulk mailing vendor or
+third party affiliates there is a problem in that Gmail
+recipients don't receive the emails unless unless both
+the From: and ReplyTo: fields are set to the tru sender!
+Also: Publish an SPF record that includes the IPs of the
+vendor or affiliates acting as your SMTA and sign your
+messages with a DKIM signature that is associated with
+your domain.
 
 From: alex@kleider.ca
+My IP: 98.97.25.207  or easyDNS's IP4:64.68.200.48
+Set the "Host" or "Name" field to @ (or leave it blank)
+to apply to your root domain.
+currently set to: v=spf1 include:easymail.ca ~all
+should I change it to my IP:
+    v=spf1 include:easymail.ca IP4:98.97.25.207 ~all
+or that of easyDNS:
+  v=spf1 include:easymail.ca IP4:64.68.200.48 ~all
+    or
+  v=spf1 include:easymail.ca IP4:64.68.200.48 Host:@ ~all
 """
 
 try: from code import helpers
@@ -82,6 +69,33 @@ def add_salutation(mapping):
     else:
         mapping[
           "salutation"] = "Dear {first} {last},"
+    return mapping
+
+def add_letter(mapping):
+    """
+    Still a work in progress
+    """
+    for key in applicants.key_status_mapping.keys():
+        if mapping["notified"]:  # shouldn't get here?
+            pass
+        elif mapping["dues_paid"]: # notify/congrats
+            pass # "member"
+        elif mapping["approved"]: # notify/request $
+            pass # "approved"
+        elif mapping["meeting3"]: # notify exec
+            pass # letter depends on # of members
+        elif mapping["meeting2"]: # acknowledge
+            pass # "meeting_2"
+        elif mapping["meeting1"]: # acknowledge
+            pass # "meeting_1" or "app_w_meeting"
+        elif mapping["no_meetings"]: # acknowledge
+            pass # "meeting_0"
+        elif mapping["fee_rcvd"]: # acknowledge
+            pass # "app_complete"
+        elif mapping["app_rcvd"]: # need fee!
+            pass # "app_fee_pending"
+        else:
+            pass
     return mapping
 
 letter_bodies = dict(
@@ -146,6 +160,12 @@ to introduce you.
 Looking forward to seeing each other at future meetings
 held at the Club: 83 Wharf Rd., Bolinas, CA 94924
 """,
+    meeting_1="""
+""",
+    meeting_2="""
+""",
+    meeting_3="""
+""",  # notify exec committee
     awaiting_vacancy="""
 The Club Executive Committee has, at its last meeting,
 approved your application for Club membership.

@@ -34,7 +34,7 @@ day = helpers.eightdigitdate
 with open(query_file, 'r') as stream:
 #   query = stream.read().format(day=day)
     query = stream.read().format(today=day)
-#_ = input(query)
+_ = input(query)
 #print(day)
 outfile = "query_output.csv"
 yn = input(f"Send data to {outfile}? (y/n): ")

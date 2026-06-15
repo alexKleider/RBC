@@ -10,6 +10,6 @@ JOIN Applicants  AS A
 ON A.personID = P.personID
 WHERE A.approved != ""
   AND A.dues_paid = ""
-  AND A.notified = ""
+  AND A.notified = ""  -- exclude non applicants
 ORDER BY P.last, P.first, P.suffix
 ;

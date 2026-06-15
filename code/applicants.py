@@ -4,7 +4,8 @@
 
 """
 code/applicants.py and
-code/people.py support logic.py
+code/people.py support logic.py.
+code/people.py supports code/applicants.py.
 """
 
 try: import cli as ui
@@ -13,24 +14,27 @@ try: import helpers
 except ImportError: from code import helpers
 try: import data
 except ImportError: from code import data
-try: import people
-except ImportError: from code import people
+try: import letters
+except ImportError: from code import letters
 
 app_letters = "app_letters.txt"  ## *
   ## * not yet used 
 
 ap_fee = 25
 key_status_mapping = { # entry to update:
-        "app_rcvd":     1,
-        "fee_rcvd":    #2,  # complete/not acknowledged
+#       "new_member": 11, 
+        "notified":    9,  # acknowledged
+        "dues_paid":   8,  # dues_paid, acknowledge
+        "approved":    7,  # needs notified
+        "meeting3":    6,  # attended 3 meeting
+        "meeting2":    5,  # attended 2 meeting
+        "meeting1":    4,  # attended 1 meeting
 #       "no_meetings": 
-                        3,  # no meetngs yet
-        "meeting1":     4,  # attended 1 meeting
-        "meeting2":     5,  # attended 2 meeting
-        "meeting3":     6,  # attended 3 meeting
-        "AP_approved":  7,  # approved
-        "AP_dues_paid": 8,  # dues_paid
-        "AP_notified":  9,  
+#                       3,  # no meetngs yet
+        "no_meetings":  3,
+        "fee_rcvd":     2,  # needs acknowledged
+        "app_rcvd":     1,
+
         }
 for_reference = '''
 1|a-|Application received without fee
@@ -65,12 +69,29 @@ for_reference = '''
 30|com|Committee member
 '''
 
-def get_lastID():
+def create_person():
     """
-    Returns the last entered personID.
-    Don't need a user interface version of this.
+    Attempts to Create an entry into the People table
+    & Return mapping with personID value.
+    Returns None if attempt fails.
     """
-    return data.get_highest_ID()
+    yn = input("Enter person data (yY) or collect from file?: ")
+    if (yn and yn[0] in ("yY")): 
+        keys = data.person_keys()
+        mapping = {key: "" for key in keys}
+        person = data.entries(mapping,
+            header="Adding New Person to People Table",
+            text="Add values (empty strings accepted)... ")
+    else:
+        person = helpers.load_json_file("A_new_person.json") 
+    if person:
+        data.put_person(person)
+        helpers.dump2json(person,
+                          "A_new_person.json")
+        person["personID"] = get_lastID()
+        return person
+    else:
+        print("logic/create_person: person is False")
 
 def get_sponsors():
     """
@@ -131,9 +152,10 @@ def add_sponsors(applicant):
 
 def add_dates(applicant):
     """
+    Updates the mapping.
+    Does _not_ change the data base!
     Add 0-3 of the Applicant table date entries.
     and on basis of them adds "statusID" to mapping.
-    Does _not_ change the data base!
 
     """
     ap_mapping = ui.add_info(applicant,
@@ -167,10 +189,11 @@ def add_letter(mapping):
 
 def create_applicant_mapping():
     """
-    Creates a Person table entry and returns a mapping
-    which includes sponsors, applicable dates and
-    receipts data as applicable but DOES NOT make any
-    other table entries.
+    Creates a Person table entry and...
+    returns an applicant mapping which includes
+    sponsors, applicable dates and receipts data
+    as applicable but...
+    DOES NOT make any other table entries.
     """
     mapping = create_person()
     if not mapping: return
@@ -180,16 +203,16 @@ def create_applicant_mapping():
     if not mapping: return
     return mapping
 
-def load_applicant(mapping):
+def store_applicant(mapping):
     """
     <mapping> contains all required applicant data.
     Applicant, Person_Status, +/- Receipts table entries.
-    People table entry has already been done and key/value
-    pairs assigned to <mapping>.
+    People table entry has already been done and
+    key/value pairs assigned to <mapping>.
     """
 #   for key, val in mapping.items():
 #       print(f"{key}: {val}")
-#   _ = input("mapping passed to code/logic.load_applicant")
+#   _ = input("mapping passed to code/logic.store_applicant")
     data.create_applicant_entry(mapping)
     data.create_person_status_entry(mapping)
     data.create_app_receipts_entry(mapping)
@@ -197,13 +220,38 @@ def load_applicant(mapping):
 
 
 def enter_applicant():
-    mapping = people.create_person()
+    """
+    Step by step creates an applicant mapping
+    and then stores it into the data base.
+    Also creates appropriate letter to applicant.
+    """
+    mapping = create_person()
     mapping = add_sponsors(mapping)
     mapping = add_dates(mapping)
-    load_applicant(mapping)
+    store_applicant(mapping)
     add_letter(mapping)
 
-def update_applicant(id_=None):
+def pick_applicant(id_=None):
+    """
+    Returns a mapping (/w personID) of chosen applicant
+    or None
+    """
+    if id_: return data.get_applicant(id_)
+    else: id_ = 0
+    ap_map = {
+              "first": "",
+              "last": "",
+              "suffix": "",
+              }
+    appl = data.entries(ap_map,
+        header="Pick Applicant",
+        text="Provide name clues.")
+    rec = get_person()
+    id_ = rec["personID"]
+    if not id_: return
+    return data.get_applicant(id_)
+
+def update_applicant():
     """
     ### INCOMPLETE ###
     Provides for addition of dates to Applicant table
@@ -212,53 +260,104 @@ def update_applicant(id_=None):
     Returns None if fails to find an applicant.
     """
     # first must pick an applicant...
-    if not id_: id_ = 0
-    ap_map = {"personID": id_,
-              "first": "",
-              "last": "",
-              "suffix": "",
-              }
-    appl = data.entries(ap_map,
-        header="Pick Applicant:by ID or clues",
-        text="If ID unknown, add name clues.")
-    id_ = appl["personID"]
-    if not id_:  # use pick person to get an ID
-        rec = get_person()
-        id_ = rec["personID"]
-    if not id_: return
-    mapping = data.get_applicant(id_)
+    while True:
+        id_ = ui.enter_text("Enter personID",
+                         "'0' if unknown '-1' to abort.")
+        try:
+            id_ = int(id_)
+        except ValueError:
+            continue
+        break
+    if id_ < 0:
+        print("Aborted entering a personID in...")
+        loc = "update_applicant in code/applicants.py"
+        print(f"{loc}")
+        return
+    # get that applicants data ( > mapping)
+    mapping = pick_applicant(id_)
+    ## keys have "A_" or "AP_" prefixed 
+    # store data (just during development..
+    helpers.dump2json(mapping,    # dump
+            "applicant2update.json")
+    # get the first vacant key ==> key2fill
     ret = {}
-    keys = ["A_personID", "A_first", "A_last", "A_suffix",
-        "AP_meeting1", "AP_meeting2", "AP_meeting3",
-        "AP_approved", "AP_dues_paid", "AP_notified", ]
-    date_keys = keys[4:]
-#   _ = input(f" date keys: {date_keys}")
-#   _ = input(f" mapping: {mapping}")
+    keys = list(mapping.keys())
+    date_keys = keys[-8:]
     date_slot = None
     for date_key in date_keys:
-        if not mapping[date_key]:
-            key2fill = date_key.split('_')[1]
-            break
+        if not mapping[date_key]:  # found key2fill
+            key2update = date_key
+            break  # key2update is 1st empty date_key
+    # determine date status change took place...
+    # set up user interface:
     header=f"{mapping['A_first']} {mapping['A_last']}"
     if mapping["A_suffix"]:
         header = header + mapping["A_suffix"]
     text="Enter date (yyyymmdd)"
-
-    d = {f"{key2fill}": "",  }
+    # get key (of new data/date) to present to user...
+    d = {"new_date": "", }
+    # get the date: user entry...
     ret = data.entries(d, header=header, text=text)
+    _ = input(ret)
+    mapping["date"] = ret["new_date"]
+    # store data /w dates ...
+    helpers.dump2json(mapping,    # dump
+            "applicant_w_new_date.json")
+    # update Applicant table with new date...
+######   def add_date(personID, date_key, date):
+    date_key = date_key.split("_")[1]
     data.add_date(mapping["A_personID"],
-                key2fill, ret[f"{key2fill}"])
+                date_key, mapping["date"])
     # now need to update Person_Status table
-    # key2fill relationship to status mapping:
-    key_status_mapping = { # entry to update:
-            "meeting1":     3,  # no meetngs yet
-            "meeting2":     4,  # attended 1 meeting
-            "meeting3":     5,  # attended 2 meeting
-            "AP_approved":  6,  # attended 3 meeting
-            "AP_dues_paid": 7,  # approved
-            "AP_notified":  8,  # dues_paid
-            }
+    # next 2 vars must match Sql/ asuc_f and asuo_fff
+    mapping["status2open"] =  key_status_mapping[
+                                      date_key]
+    mapping["status2close"] = key_status_mapping[
+                                      date_key] - 1
+    # update old & create new entry: Person_Status table:
+    helpers.dump2json(mapping,
+            "applicant_w_stati2change.json")
+    mapping["personID"] = mapping["A_personID"]
+    data.update_applicant_status(mapping)
 
+
+def ck_get_sponsors():
+    for key, val in get_sponsors().items():
+        print(f"{key}: {val}")
+
+def ck_new_applicant():
+    print("Running get_applicant.py")
+    dest = "ck_app_entry.json"
+    mapping = new_applicant()
+
+    if mapping:
+        with open(dest, 'w') as outf:
+            json.dump(mapping, outf, indent=2)
+        print("(Applicant) data dumped to "
+                + f"{outf.name}")
+        yn = input(
+            "Print to screen as well? (yn): ")
+        if yn and yn[0] in "yY":
+            for key, val in mapping.items():
+                print(f"{key}: {val}")
+    else:
+        print(f"new_applicant returned {mapping}")
+
+def main():
+    cmds_available = [
+        get_sponsors,
+        enter_applicant,
+        update_applicant,
+        ] 
+    cmd = data.choose(cmds_available)  # may want to
+        #  add default key word params header & text
+    print()
+    print(f"About to run {cmd.__name__} ...")
+    res = cmd()
+    print(f"Finished running {cmd.__name__} ==> ", end='')
+    print(res)
 
 if __name__ == "__main__":
     print("Running code/applicants.py")
+    main()
+

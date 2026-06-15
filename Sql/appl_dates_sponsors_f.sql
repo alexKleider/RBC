@@ -2,8 +2,8 @@
 -- Requires {today} to be specified 
 SELECT
     P.personID, PS.statusID, P.last, P.first, P.suffix,
-    P.phone, P.address, P.town, P.state, P.postal_code,
-    P.email,
+--  P.phone, P.address, P.town, P.state, P.postal_code,
+--  P.email,
     Ap.app_rcvd, Ap.meeting1, Ap.meeting2, Ap.meeting3,
     S1.first, S1.last, S1.suffix, S1.personID, PS1.statusID,
     S2.first, S2.last, S2.suffix, S2.personID, PS2.statusID
@@ -28,8 +28,8 @@ AND   PS2.statusID < 20
 AND   PS2.end = ""
 AND   (PS.end = "" OR PS.end > {today})
 AND   PS.statusID < 11
---ORDER BY P.last, P.first, P.suffix
-ORDER BY PS.statusID ASC, P.personID ASC
--- personID will be order in which applied
+AND   Ap.notified = ""
+ORDER BY 
+    P.personID ASC
 ;
 

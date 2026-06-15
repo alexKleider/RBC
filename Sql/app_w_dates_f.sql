@@ -10,7 +10,7 @@ SELECT
     AP.meeting3, AP.approved, AP.dues_paid, AP.notified
 FROM Applicants AS AP,
      People AS A
-WHERE A.personID = {} -- id_
+WHERE A.personID = {personID} -- id_
 AND   AP.personID = A.personID
 ;
 

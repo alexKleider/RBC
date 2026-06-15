@@ -67,35 +67,10 @@ def ck_collect():
     with open(mapping_f, 'r') as jf:
         pass
 
-def ck_get_sponsors():
-    for key, val in get_sponsors().items():
-        print(f"{key}: {val}")
-
-def ck_new_applicant():
-    print("Running get_applicant.py")
-    dest = "ck_app_entry.json"
-    mapping = new_applicant()
-
-    if mapping:
-        with open(dest, 'w') as outf:
-            json.dump(mapping, outf, indent=2)
-        print("(Applicant) data dumped to "
-                + f"{outf.name}")
-        yn = input(
-            "Print to screen as well? (yn): ")
-        if yn and yn[0] in "yY":
-            for key, val in mapping.items():
-                print(f"{key}: {val}")
-    else:
-        print(f"new_applicant returned {mapping}")
-
 
 def main():
     cmds_available = [
         people.get_person,
-        applicants.get_sponsors,
-        applicants.enter_applicant,
-        applicants.update_applicant,
         ] 
     cmd = data.choose(cmds_available)  # may want to
         #  add default key word params header & text
@@ -105,19 +80,7 @@ def main():
     print(f"Finished running {cmd.__name__} ==> ", end='')
     print(res)
 
-def ck_get_person():
-    ret = get_person()
-    if ret:
-        for key, value in ret.items():
-            print(f"{key}: {value}")
-    else:
-        print(f"get_person returned {ret}")
-    return ret
-
 if __name__ == "__main__":
-#   ck_new_applicant()
-#   ck_get_sponsors()
 #   print("running code/logic.py")
-#   ck_get_person()
     main()
 

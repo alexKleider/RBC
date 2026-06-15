@@ -36,6 +36,15 @@ def ck_yn():
     print(f"yn returning {yn()}")
 
 
+def enter_text(header="Enter Text",
+               text="Make text entry."):
+    if header:
+        print(header)
+        print("=" * len(header))
+    print(text)
+    txt = input()
+    return txt
+
 def announce(header="Note the following...",
              text="Announcing..."):
     """

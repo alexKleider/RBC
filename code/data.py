@@ -62,6 +62,14 @@ def get_hints(header="People Table Lookup",
     return ui.get_hints(header=header,
       text=text)
 
+def update_applicant_status(mapping):
+    sql.fetch_d_query("Sql/asuc_f.sql",
+                      mapping,
+                      commit=True)
+    sql.fetch_d_query("Sql/asuo_fff.sql",
+                      mapping,
+                      commit=True)
+
 def get_mappings(which_type):
     queries = dict(
         applicants= ("Sql/appl_dates_sponsors_f.sql",
@@ -188,7 +196,7 @@ def get_person(personID, keys=None):
     return sql.get_rec_by_ID(personID, keys=None)
 
 def get_applicant(personID):
-    return sql.get_applicant(personID)
+    return sql.get_applicant(**{"personID":personID})
 
 def person_keys():
     """
@@ -278,6 +286,8 @@ def add_date(personID, date_key, date):
         {date_key} = "{date}"
         WHERE personID = {personID}
         ;"""
+    print("Query about to be run...")
+    _ = input(query)
 #   print("In cli.add_date running:")
 #   _ = input(query)
     sql.fetch(query, from_file=False, commit=True)

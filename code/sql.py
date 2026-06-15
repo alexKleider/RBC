@@ -188,6 +188,13 @@ def keys_from_query(query, replace_periods=False):
         return [key[-1] for key in splitkeys]
 
 
+def get_rec(query_file, mapping):
+    with open(query_file, 'r') as stream:
+        query = stream.read().format(**mapping)
+    values = fetch(query, from_file=False)[0]
+    keys = query_keys(query)
+    return dict(zip(keys, values))
+
 def dicts_from_query(query, from_file=False,
                      keys=None, replace_periods=False):
     """
@@ -570,9 +577,13 @@ def get_rec_by_ID(id_, keys=None):
 
 def get_applicant(personID):
     """ Returns data from People & Applicant tables"""
-    query = import_query("Sql/app_w_dates_f.sql"
-            ).format(personID)
-#   _ = input(f"query is {query}")
+    file = "Sql/app_w_dates_f.sql"
+    mapping = {"personID": personID, }
+    return get_rec(file, mapping)
+    query = import_query("Sql/app_w_dates_f.sql")
+    print(query)
+    print(query.format(personID))
+    _ = input(f"query is {query}")
     ret = dicts_from_query(query, replace_periods=True)
     return next(ret)
 
@@ -663,6 +674,12 @@ def ck_pick_People_record():
 
 def ck_get_applicant():
     print(get_applicant(249))
+
+def ck_get_rec():
+    query_file = "Sql/app_w_dates_f.sql"
+    mapping = {"personID": 251,}
+    print(f"{get_rec(query_file, mapping)}")
+
 
 if __name__ == "__main__":
 #   ck_pick_People_record()

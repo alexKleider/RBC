@@ -7,31 +7,13 @@
 
 from code import helpers
 from code import data
-from code import applicants
 
-def create_person():
+def get_lastID():
     """
-    Attempts to Create an entry into the People table
-    & Return mapping with personID value.
-    Returns None if attempt fails.
+    Returns the last entered personID.
+    Don't need a user interface version of this.
     """
-    yn = input("Enter person data (yY) or collect from file?: ")
-    if (yn and yn[0] in ("yY")): 
-        keys = data.person_keys()
-        mapping = {key: "" for key in keys}
-        person = data.entries(mapping,
-            header="Adding New Person to People Table",
-            text="Add values (empty strings accepted)... ")
-    else:
-        person = helpers.load_json_file("A_new_person.json") 
-    if person:
-        data.put_person(person)
-        helpers.dump2json(person,
-                          "A_new_person.json")
-        person["personID"] = applicants.get_lastID()
-        return person
-    else:
-        print("logic/create_person: person is False")
+    return data.get_highest_ID()
 
 def get_person():
     """
@@ -59,6 +41,27 @@ def get_person():
 def in_good_standing(personID):
     """ returns True (member for >= 1yr) or False """
     return data.is_member_in_good_standing(personID)
+
+def ck_get_person():
+    ret = get_person()
+    if ret:
+        for key, value in ret.items():
+            print(f"{key}: {value}")
+    else:
+        print(f"get_person returned {ret}")
+    return ret
+
+def main():
+    cmds_available = [
+        people.get_person,
+        ] 
+    cmd = data.choose(cmds_available)  # may want to
+        #  add default key word params header & text
+    print()
+    print(f"About to run {cmd.__name__} ...")
+    res = cmd()
+    print(f"Finished running {cmd.__name__} ==> ", end='')
+    print(res)
 
 if __name__ == "__main__":
     print("Running people.py")

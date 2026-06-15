@@ -4,6 +4,15 @@
 
 """
 Driver program for Bolinas Rod & Boat Club data management.
+beginning main.py
+******
+Choose: (Select by number...)
+   1: get_person
+   2: enter_applicant
+   3: update_applicant
+   4: test_send
+   5: check_consistency_report
+Choose a function to execute (0 to quit):
 """
 
 try: from code import cli as ui
@@ -24,7 +33,6 @@ except ImportError: import applicants
 
 cmds_available = [
     people.get_person,
-    applicants.get_sponsors,
     applicants.enter_applicant,
     applicants.update_applicant,
     send_emails.test_send,
@@ -50,8 +58,4 @@ def main():
             break
 
 if __name__ == "__main__":
-#   forJune.member_email_listing()
-#   logic.create_person()
     main()
-#   print(f"{logic.getID()=}")
-#   logic.enter_applicant()
