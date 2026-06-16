@@ -29,6 +29,8 @@ try: import people
 except ImportError: from code import people
 try: import applicants
 except ImportError: from code import applicants
+try: import reports
+except ImportError: from code import reports
 
 #print("logic.py: being imported (or run.)")
 

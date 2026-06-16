@@ -68,7 +68,6 @@ def fetch(sql_source, db=db_file_name, params=None,
     if from_file:
         with open(sql_source, 'r') as source:
             query = source.read()
-#       _ = input(f"### Query begins next line\n{query}")
     else: query = sql_source
     if verbose:
         pass
@@ -78,12 +77,9 @@ def fetch(sql_source, db=db_file_name, params=None,
     if data:
         cur.executemany(query, data)
     elif params:
-#       _ = input(f"params set to '{params}'")
         cur.execute(query, params)
     else:
         cur.execute(query)
-#   _ = input(
-#       f"get_query_result returning the following:\n {ret}")
     ret = cur.fetchall()
     if commit:
         db.commit()
@@ -111,7 +107,6 @@ def fetch_d_query(sql_file_name, data, commit=False):
     """
     query = import_query(sql_file_name)
     query = query.format(**data)
-#   _ = input(f"fetch_d_query param is\n{query}")
     return fetch(query, from_file=False, commit=commit)
 
 
@@ -209,9 +204,7 @@ def dicts_from_query(query, from_file=False,
     if not keys:
         keys = keys_from_query(query,
                        replace_periods=replace_periods)
-#   print(f"in dicts_from_query keys are.../n{keys}")
     res = fetch(query, from_file=False)
-#   _ = input(res)
     for entry in res:
         d = dict(zip(keys, entry))
         yield d
@@ -232,7 +225,6 @@ def query2dict_listing(query, keys=False,
     ret = []
     if not keys:
         keys = keys_from_query(query)
-#   _ = input(f"query2dict_listing param is\n{query}")
     res = fetch(query, from_file=from_file)
     for entry in res:
         d = dict(zip(keys, entry))
@@ -277,7 +269,6 @@ def query2csv(query, fname):
         dictwriter.writeheader()
         for mapping in dicts_from_query(query,
                                         keys=keys):
-#           _ = input(repr(mapping))
             dictwriter.writerow(mapping)
 
 def query_keys(query):
@@ -383,7 +374,6 @@ def get_person_fields_by_ID(personID, fields=None):
     `_if_ <fields> is provided (as an iterable,)
      _otherwise_ returns a tuple of all fields.
     """
-#   _ = input("Entering code/routines.get_person_fields_by_ID")
     query = """SELECT {{}} FROM People
     WHERE personID = {};""".format(personID)
     if fields:
@@ -391,19 +381,14 @@ def get_person_fields_by_ID(personID, fields=None):
         var = ', '.join(fields)
     else: var = '*'
     query = query.format(var)
-#   _ = input(query)
     res = fetch(query, from_file=False)[0]  # Note the '[0]'
     if fields:
         dic = {}
         z = zip(fields, range(len(fields)))
         for field, n in z:
             dic[field] = res[n]
-#       for key, value in dic.items():
-#           print(f"'{key}': '{value}'")
-#       _ = input("^dict version of query^")
         return dic
     else:
-#       _ = input(res)
         return res
 
 def get_ids_by_name(first, last, db=db_file_name):
@@ -417,7 +402,6 @@ def get_ids_by_name(first, last, db=db_file_name):
     query = f"""SELECT personID, first, last, suffix from People
             WHERE People.first = "{first}"
             AND People.last = "{last}" """
-#   _ = input(query)
     con = sqlite3.connect(db)
     cur = con.cursor()
     execute(cur, con, query)
@@ -441,12 +425,10 @@ def get_people_fields_by_ID(db_file_name=db_file_name,
         var = ', '.join(fields)
     else: var = '*'
     query = query.format(var)
-#   _ = input(query)
     con = sqlite3.connect(db_file_name)
     cur = con.cursor()
     execute(cur, con, query.format(var))
     res = cur.fetchall()
-#   _ = input(res)
     for entry in res:
         ret[entry[0]] = entry[1:]
     return ret
@@ -500,7 +482,6 @@ def id_by_name():
                 commit=False
                 )
     ret = ["{:3>} {} {} {}".format(*entry) for entry in ret]
-#   _ = input(ret)
     return ret
 
 def pick_id():
@@ -581,9 +562,6 @@ def get_applicant(personID):
     mapping = {"personID": personID, }
     return get_rec(file, mapping)
     query = import_query("Sql/app_w_dates_f.sql")
-    print(query)
-    print(query.format(personID))
-    _ = input(f"query is {query}")
     ret = dicts_from_query(query, replace_periods=True)
     return next(ret)
 

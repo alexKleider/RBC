@@ -71,9 +71,11 @@ def update_applicant_status(mapping):
                       commit=True)
 
 def get_mappings(which_type):
+    """ collect mapping of type specified """
     queries = dict(
-        applicants= ("Sql/appl_dates_sponsors_f.sql",
+        applicants= ("Sql/applicant_report_f.sql",
                      helpers.eightdigitdate),
+        # Included are members & applicans: vvv
         all_members = ("Sql/all_members_ff.sql",
                      helpers.eightdigitdate),
         leadership = ("Sql/leadership_f.sql",
@@ -88,23 +90,10 @@ def get_mappings(which_type):
                                replace_periods=True)
     return [mapping for mapping in res]
 
-def applicant_mappings():  # ?not used/redact? #
-    """
-    Uses the "Sql/appl_dates_sponsors_f.sql" query to
-    retrieve a listing of applicant data mappings.
-    """
-    query = sql.import_query(
-            "Sql/appl_dates_sponsors_f.sql")
-    query = query.format(today=helpers.eightdigitdate)
-    apps = sql.dicts_from_query(query, from_file=False,
-                                replace_periods=True)
-
-    return [mapping for mapping in apps] 
-
 def member_mappings():
     """
-    Uses the "Sql/all_members_ff.sql" query to
-    retrieve a listing of applicant data mappings.
+    !! Replace with get_mappings("all_members") !!
+    Both use the "Sql/all_members_ff.sql" query.
     """
     query = sql.import_query(
             "Sql/all_members_ff.sql")
@@ -178,7 +167,6 @@ def getP_from_clues(mapping):
     FROM People
     WHERE {' AND '.join(conditions)}
     ;"""
-#   _ = input(f"Clues query is\n{query}")
     ret = sql.dicts_from_query(query, from_file=False)
 #   print(query)
 #   for mapping in ret: print(mapping)
@@ -286,17 +274,12 @@ def add_date(personID, date_key, date):
         {date_key} = "{date}"
         WHERE personID = {personID}
         ;"""
-    print("Query about to be run...")
-    _ = input(query)
-#   print("In cli.add_date running:")
-#   _ = input(query)
     sql.fetch(query, from_file=False, commit=True)
 
 def set_person_status(personID, statusID, begin_date):
     query = f"""INSERT INTO Person_Status 
         (personID, statusID, begin) VALUES
         ({personID}, {statusID}, "{begin_date}");"""
-#   _ = input(query)
     sql.fetch(query, from_file=False, commit=True)
 
 
@@ -305,7 +288,6 @@ def update_person_status(personID, old_status,
     query = f"""UPDATE Person_Status SET end = {date}
             WHERE personID = {personID}
             AND statusID = {old_status};"""
-#   _ = input(query)
     sql.fetch(query, from_file=False, commit=True)
     set_person_status(personID, new_status, date)
 

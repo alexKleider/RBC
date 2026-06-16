@@ -3,7 +3,7 @@
 # File: main.py
 
 """
-Driver program for Bolinas Rod & Boat Club data management.
+Driver prgm for Bolinas Rod & Boat Club data management.
 beginning main.py
 ******
 Choose: (Select by number...)
@@ -12,6 +12,7 @@ Choose: (Select by number...)
    3: update_applicant
    4: test_send
    5: check_consistency_report
+   6: file_report2exec
 Choose a function to execute (0 to quit):
 """
 
@@ -29,6 +30,8 @@ try: from code import people
 except ImportError: import people
 try: from code import applicants
 except ImportError: import applicants
+try: from code import reports
+except ImportError: import reports
 
 
 cmds_available = [
@@ -37,6 +40,7 @@ cmds_available = [
     applicants.update_applicant,
     send_emails.test_send,
     ck_data.check_consistency_report,
+    reports.file_exec_report,
     ]
 
 def main():

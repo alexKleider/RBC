@@ -17,8 +17,11 @@ The _mapping() functions moved into data.py
 Possible m_types:
     "active", "first_yr", "honorary", "inactive"
 """
-import helpers
-import data
+from code import helpers
+from code import data
+
+today = helpers.eightdigitdate4filename
+f_exec_report = f"report2exec_{today}.txt"
 
 linelengthlimit = 62
 
@@ -50,31 +53,35 @@ def _limit_line_lengths(entry, linelengthlimit=linelengthlimit):
             ret.append(line)
     return "\n".join(ret)
 
+def applicant_mappings():
+    """ Returns a listing of current applicant dicts"""
+    return data.get_mappings("applicants")
+
 def applicant_listing(mappings):
     """
-    Returns a formatted, with 'by # of meetings' headers,
-    listing of applicant data (a list of lines.)
+    Returns a (formatted 'by # of meetings' and
+    headers) a list of lines showing all current
+    applicant data.
    <mappings> come from data.applicant_mappings().
     """
-    # set up the template for each applicant entry...
-    template = """
-  [{P_personID:>3}], {P_first} {P_last} {P_suffix} {P_email} {P_phone}
+    # set up a template for each applicant entry...
+    template = """  [{P_personID:>3}], {P_first} {P_last} {P_suffix} {P_email} {P_phone}
      Sponsors: {S1_first} {S1_last} {S1_suffix}, {S2_first} {S2_last} {S2_suffix}  [{S1_personID}, {S2_personID}]
      Applied: {Ap_app_rcvd}  """
-    # last line of template will depend on # of meetings...
+    # Last line varies /w # of meetings...
     add3 = "Meetings: {Ap_meeting1}, {Ap_meeting2}, {Ap_meeting3}"
     add2 = "Meetings: {Ap_meeting1}, {Ap_meeting2}"
     add1 = "Meeting date: {Ap_meeting1}"
-    # collectors & headers for each type (by # of meetings)
+    # Collectors & headers...
     no_meetings = []; header0 = "No Meetings Yet"
     one_meeting = []; header1 = "Attended One Meeting"
     two_meetings = []; header2 = "Attended Two Meetings"
     three_meetings = []; header3 = "Attended Three Meetings"
     m3 = []; m2 = []; m1 = []; m0 = []
-    # use query to get the mappings...
-#   apps = data.applicant_mappings()
+    # Get the mappings...
     apps = data.get_mappings("applicants")
-    # separate mappings into "by meeting" listings...
+    n_apps = len(apps)
+    # Separate into "by meeting" listings...
     for map in apps:
         if map["Ap_meeting3"]:
             m3.append(map)
@@ -85,15 +92,17 @@ def applicant_listing(mappings):
         elif map["Ap_meeting0"]:
             m0.append(map)
         else:
-            _ = input("bypassed!!!")
-    # assemble the report...
+            _ = input("bypassed in code/reports!")
+    # Assemble the report...
     report = []
+    n = 0
     if m0:
         report.append(header0)
         report.append('-' * len(report[-1]))
         for d in m0:
             report.append(template.format(**d))
-        report.append("")
+            n += 1
+#       report.append("")
     if m1:
         report.append(header1)
         report.append('-' * len(report[-1]))
@@ -101,15 +110,18 @@ def applicant_listing(mappings):
         for d in m1:
             report.append(_limit_line_lengths(
                 template1.format(**d)))
-        report.append("")
+            n += 1
+#       report.append("")
     if m2:
         report.append(header2)
         report.append('-' * len(report[-1]))
         template2 = template + add2
         for d in m2:
+#           _ = input(d)
             report.append(_limit_line_lengths(
                 template2.format(**d)))
-        report.append("")
+            n += 1
+#       report.append("")
     if m3:
         report.append(header3)
         report.append('-' * len(report[-1]))
@@ -117,7 +129,9 @@ def applicant_listing(mappings):
         for d in m3:
             report.append(_limit_line_lengths(
                 template3.format(**d)))
-        report.append("")
+            n += 1
+#       report.append("")
+    report.append(n)  # last line: # of applicants
     return report
 
 
@@ -128,8 +142,8 @@ def applicant_report():
     """
     mappings = data.get_mappings("applicants")
     report = _header4("applicants")
-    report.append('')
-    report.extend(applicant_listing(mappings))
+#   report.append('')
+    report.extend(applicant_listing(mappings)[:-1])
     return report
 
 def member_listing():
@@ -178,7 +192,7 @@ def _header4(whom):
     if whom == "exec":
         header = [f"Membership Report (prepared {helpers.date})", ]
         header.append("=" * len(header[0]))
-        header.extend([ "",
+        header.extend([
         f"Total membership currently stands at {tm} of which",
         f"{gs} are 'members in good standing' while {f} ",
         f"are still within their first year of membership.",
@@ -211,6 +225,14 @@ def exec_report():  # report to executive committee
          'PS Zoom ID: 527 109 8273; Password: 999620',
         ])
     return report
+
+def file_exec_report():
+    """prepares a report file for exec committee"""
+    report = exec_report()
+    with open(f_exec_report, 'w') as f:
+        for line in report:
+            print(line, file=f)
+        print(f"Exec report sent to {f.name}")
 
 def forWeb():
     """

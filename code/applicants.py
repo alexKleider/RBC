@@ -210,9 +210,6 @@ def store_applicant(mapping):
     People table entry has already been done and
     key/value pairs assigned to <mapping>.
     """
-#   for key, val in mapping.items():
-#       print(f"{key}: {val}")
-#   _ = input("mapping passed to code/logic.store_applicant")
     data.create_applicant_entry(mapping)
     data.create_person_status_entry(mapping)
     data.create_app_receipts_entry(mapping)
@@ -298,7 +295,7 @@ def update_applicant():
     d = {"new_date": "", }
     # get the date: user entry...
     ret = data.entries(d, header=header, text=text)
-    _ = input(ret)
+#   _ = input(ret)
     mapping["date"] = ret["new_date"]
     # store data /w dates ...
     helpers.dump2json(mapping,    # dump
