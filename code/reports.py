@@ -25,19 +25,22 @@ f_exec_report = f"report2exec_{today}.txt"
 
 linelengthlimit = 62
 
-keys = """
+redact = '''keys = """
 SELECT
     P.personID, PS.statusID,
     P.first, P.last, P.suffix, P.email, P.address,
     P.town, P.state, P.postal_code, P.phone
 """
+'''
 
-def _limit_line_lengths(entry, linelengthlimit=linelengthlimit):
+def _limit_line_lengths(entry,
+                linelengthlimit=linelengthlimit):
     """
-    <entry> is text typically containing '\n' characters
-    Lines (between '\n' chars) are limited to <linelengthlimit>
-    (word boundies respected) with the removed part, right
-    justified on a following line.
+    <entry> is text typically containing '\n's.
+    Lines (between '\n' chars) are limited to
+    <linelengthlimit> (word boundies respected)
+    with the removed part, right justified on a
+    following line.
     """
     ret = []
     for line in (entry.split("\n")):
@@ -57,12 +60,12 @@ def applicant_mappings():
     """ Returns a listing of current applicant dicts"""
     return data.get_mappings("applicants")
 
-def applicant_listing(mappings):
+def applicant_listing():
     """
-    Returns a (formatted 'by # of meetings' and
-    headers) a list of lines showing all current
+    Returns a (formatted /w headers and ordered by
+    # of meetings) list of lines showing all current
     applicant data.
-   <mappings> come from data.applicant_mappings().
+    Last line is an int: number of applicants.
     """
     # set up a template for each applicant entry...
     template = """  [{P_personID:>3}], {P_first} {P_last} {P_suffix} {P_email} {P_phone}
@@ -140,10 +143,16 @@ def applicant_report():
     Adds header & footer to what's returned by
     applicant_listing() returning a list of strings.
     """
-    mappings = data.get_mappings("applicants")
+#   mappings = data.get_mappings("applicants")
+#   app_data_w_n = applicant_listing(mappings)
+    app_data_w_n = applicant_listing()
+    n_apps = int(app_data_w_n[-1])
+    report_body = app_data_w_n[:-1]
     report = _header4("applicants")
+    report[-2] = report[-2].format(
+            n=n_apps)
 #   report.append('')
-    report.extend(applicant_listing(mappings)[:-1])
+    report.extend(report_body)
     return report
 
 def member_listing():
@@ -199,9 +208,9 @@ def _header4(whom):
         f"There are also {h} honorary and {i} inactive members.",
           "", ])
     if whom == "applicants":
-        header = [
-            f"Applicants (currently {a} in number)"
-            + f" as of {helpers.date}.", ]
+        header = [  # an "f" header in this case
+            "Applicants (currently {n} in number"
+            + f" as of {helpers.date})", ]
         header.append("=" * len(header[0]))
     return header
 
