@@ -17,21 +17,16 @@ The _mapping() functions moved into data.py
 Possible m_types:
     "active", "first_yr", "honorary", "inactive"
 """
-from code import helpers
-from code import data
+try: import helpers
+except ImportError: from code import helpers
+try: import data
+except ImportError: from code import data
 
 today = helpers.eightdigitdate4filename
 f_exec_report = f"report2exec_{today}.txt"
+f_4web = "4Web.txt"
 
 linelengthlimit = 62
-
-redact = '''keys = """
-SELECT
-    P.personID, PS.statusID,
-    P.first, P.last, P.suffix, P.email, P.address,
-    P.town, P.state, P.postal_code, P.phone
-"""
-'''
 
 def _limit_line_lengths(entry,
                 linelengthlimit=linelengthlimit):
@@ -68,7 +63,7 @@ def applicant_listing():
     Last line is an int: number of applicants.
     """
     # set up a template for each applicant entry...
-    template = """  [{P_personID:>3}], {P_first} {P_last} {P_suffix} {P_email} {P_phone}
+    template = """  [{P_personID:>3}] {P_first} {P_last} {P_suffix} {P_email} {P_phone}
      Sponsors: {S1_first} {S1_last} {S1_suffix}, {S2_first} {S2_last} {S2_suffix}  [{S1_personID}, {S2_personID}]
      Applied: {Ap_app_rcvd}  """
     # Last line varies /w # of meetings...
@@ -120,7 +115,6 @@ def applicant_listing():
         report.append('-' * len(report[-1]))
         template2 = template + add2
         for d in m2:
-#           _ = input(d)
             report.append(_limit_line_lengths(
                 template2.format(**d)))
             n += 1
@@ -137,47 +131,70 @@ def applicant_listing():
     report.append(n)  # last line: # of applicants
     return report
 
+def hon_and_inactive_report():
+    report = [ ]
+    hon_listing = member_listing({14: " ", })
+    if hon_listing:
+        report.extend(_header4("honorary"))
+        report.extend(hon_listing)
+#       report.append("")
+    inac_listing = member_listing({16: " ", })
+    if inac_listing:
+        report.extend(_header4("inactive"))
+        report.extend(inac_listing)
+    return report
+
 
 def applicant_report():
     """
     Adds header & footer to what's returned by
     applicant_listing() returning a list of strings.
     """
-#   mappings = data.get_mappings("applicants")
-#   app_data_w_n = applicant_listing(mappings)
     app_data_w_n = applicant_listing()
     n_apps = int(app_data_w_n[-1])
     report_body = app_data_w_n[:-1]
     report = _header4("applicants")
     report[-2] = report[-2].format(
             n=n_apps)
-#   report.append('')
+#   report.append("")
     report.extend(report_body)
     return report
 
-def member_listing():
+def member_listing(flags={
+        11: "*", 15: " ", 14: "@", 16: "%", 17: "^"},
+                   include_status_flag=True):
     """
+    By default:
     Returns a formatted listing of all members (incl.
     first year, in good standing, inactive and honorary)
-    with indicators for those not "in-good_standing."
+    with indicators for those not yet "in-good_standing."
+    Possible to:
+    1. limit output by limiting <flags> set
+    2. supress status flags (values of flags mapping.)
     """
-    stati = {11: "*", 15: " ", 14: "@", 16: "%", 17: "^"}
-    fmt_str = """{status} {P_first} {P_last} {P_suffix}  {P_phone} [{P_email}]
+    fmt_str = """{status} [{P_personID:>3}] {P_first} {P_last} {P_suffix}  {P_phone} [{P_email}]
     {P_address}, {P_town}, {P_state} {P_postal_code} -joined: {PS_begin}
 """
     report = []
     first_letter = "_"
+    stati_keys = flags.keys()
     for mbr in data.get_mappings("all_members"):
-        mbr["status"] = stati[mbr["PS_statusID"]]
-        if mbr["P_last"][0] != first_letter:
-            report.append("")
-            first_letter = mbr["P_last"][0]
-        report.append(fmt_str.format(**mbr))
+#       _ = input(mbr)
+        if mbr["PS_statusID"] in stati_keys:
+            if include_status_flag:
+                mbr["status"] = flags[mbr["PS_statusID"]]
+            else: mbr["status"] = " "
+            if ((15 in stati_keys) and
+                (mbr["P_last"][0] != first_letter)):
+                report.append("")
+                first_letter = mbr["P_last"][0]
+            report.append(fmt_str.format(**mbr))
     return report
 
 def _header4(whom):
     """
-    <whom> possible values: web", "exec", "applicants"...
+    <whom> possible values: web", "exec", "applicants",
+    "honorary", "inactive", ...
     """
     gs = data.numbers("in_good_standing")
     f = data.numbers("first_yr")
@@ -185,33 +202,44 @@ def _header4(whom):
     h = data.numbers("honorary")
     i = data.numbers("inactive")
     a = data.numbers("applicants")
+    header = []
+
     if whom == "web":
         header = [f"Membership Roster (as of {helpers.date})", ]
         header.append("=" * len(header[0]))
         header.extend([ "",
-        f"Total membership currently stands at {tm} of which",
+        f"Currently active membership stands at {tm} of which",
         f"{gs} are 'members in good standing' while {f} ",
         f"(those indicated by an (*) asterix) are still",
         "within their first year of membership.",
-        "Members indicated by a (^) caret have announced",
-        "their intent to retire from the club.",
-        f"Also listed are {h} honorary members, indicated by an",
-        f"'at' (@) sign and {i} inactive members, indicated by",
-        "a percent (%) sign.", "", ])
+        "A (^) caret (if present) indictes an active member who",
+        "has expressed the intent to retire from the club.",
+        "Member ID's are included for the data base manager's",
+        "convenience."
+
+
+                       ])
     if whom == "exec":
-        header = [f"Membership Report (prepared {helpers.date})", ]
+        header.extend[
+            f"Executive Committee (prepared {helpers.date})", ]
         header.append("=" * len(header[0]))
-        header.extend([
-        f"Total membership currently stands at {tm} of which",
-        f"{gs} are 'members in good standing' while {f} ",
-        f"are still within their first year of membership.",
-        f"There are also {h} honorary and {i} inactive members.",
-          "", ])
+
     if whom == "applicants":
-        header = [  # an "f" header in this case
-            "Applicants (currently {n} in number"
-            + f" as of {helpers.date})", ]
+        header.append(
+            f"Applicants (currently {a} in number"
+            + f" as of {helpers.date})")
         header.append("=" * len(header[0]))
+
+    if whom == "honorary":
+        header.append("")
+        header.append(f"There are {h} Honorary Members")
+#       print('-' * len(header[:-1]))
+        header.append('-' * len(header[-1]))
+
+    if whom == "inactive":
+        header.append("")
+        header.append(f"There are {i} Inactive Members")
+        header.append('-' * len(header[-1]))
     return header
 
 def exec_report():  # report to executive committee
@@ -243,7 +271,7 @@ def file_exec_report():
             print(line, file=f)
         print(f"Exec report sent to {f.name}")
 
-def forWeb():
+def web_listing():
     """
     """
     report = ["""
@@ -256,13 +284,23 @@ COMMITTEE.
 """, ]
     report.append("")
     report.extend(_header4("web"))
-    report.extend(member_listing())
-    report = report[:-2]
+    report.extend(member_listing({11:"*", 15:" ",}))
     report.append('*' * 60)
-    report.append(report[-1])
+    hon_and_inactive = hon_and_inactive_report()
+    if hon_and_inactive:
+        report.extend(hon_and_inactive)
+    report.append("*" * 60)
     report.append("")
     report.extend(applicant_report())
     return report
+
+def file4web():
+    listing = web_listing()
+    with open(f_4web, 'w') as f:
+        for line in listing:
+            print(line, file=f)
+        print(f"WWW report sent to {f.name}")
+
 
 def ck__limit_line_lengths():
     text = """Hello my friend, how is every things?
@@ -311,17 +349,17 @@ def send2file(listing, test_file=None):
     print(f"Output sent to '{test_file}'.")
 
 def ck_member_listing():
-    listing = member_listing()
+    print("Current full members only...")
+    listing = member_listing({11: "*",15: " "})
     send2file(listing)
 
 def ck_headers():
+    pass
 #   send2file(_header4("web"), "4web.txt")
 #   send2file(_header4("exec"), "4exec.txt")
-    send2file(_header4("applicants"), "4applicants.txt")
-
+#   send2file(_header4("applicants"), "4applicants.txt")
 
 if __name__ == "__main__":
-#   send2file(applicant_report(), "4app.txt")
-    send2file(exec_report(), "4exec.txt")
-#   send2file(forWeb(), "4web.txt")
+    send2file(forWeb())
+#   ck_member_listing()
 

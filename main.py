@@ -41,6 +41,7 @@ cmds_available = [
     send_emails.test_send,
     ck_data.check_consistency_report,
     reports.file_exec_report,
+    reports.file4web
     ]
 
 def main():

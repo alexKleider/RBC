@@ -129,15 +129,14 @@ def in_good_standing(personID):
         AND begin < "{helpers.eightdigitdate}"
         AND end = ""
         ; """
-#   print(query)
     return sql.fetch(query, from_file=False)
     if res:
         return True
-        print(f"{personID} in good standing")
-        for line in res:
-            print(line)
-    else:
-        print(f"{personID} not in good standing")
+#       print(f"{personID} in good standing")
+#       for line in res:
+#           print(line)
+#   else:
+#       print(f"{personID} not in good standing")
 
 def ck_in_good_standing():
     for id_ in (100, 250):
