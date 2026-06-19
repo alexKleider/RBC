@@ -32,9 +32,6 @@ def yn(header="Confirmation Required",
     if yn and yn[0] in "yY":
         return True
 
-def ck_yn():
-    print(f"yn returning {yn()}")
-
 
 def enter_text(header="Enter Text",
                text="Make text entry."):

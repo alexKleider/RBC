@@ -1,0 +1,28 @@
+
+# File: ui.txt
+
+code.data
+Methods defined in:  cli             gui           
+yn                    *               *
+announce              *               *
+entries               *               *
+add_info              *
+choose                                *
+confirm_mapping       *
+get_hints             *               *
+acceptable            *
+confirm_text          *
+
+
+required in data    defined in cli   defined in gui
+yn
+announce
+
+Defined in gui not used in code.data:
+ok
+
+Defined in cli not used in code.data
+ok
+enter_text
+
+

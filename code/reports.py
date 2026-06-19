@@ -98,9 +98,10 @@ def applicant_listing():
         report.append(header0)
         report.append('-' * len(report[-1]))
         for d in m0:
-            report.append(template.format(**d))
+            report.append(_limit_line_lengths(
+                template2.format(**d)))
+            report.append("")
             n += 1
-#       report.append("")
     if m1:
         report.append(header1)
         report.append('-' * len(report[-1]))
@@ -108,6 +109,7 @@ def applicant_listing():
         for d in m1:
             report.append(_limit_line_lengths(
                 template1.format(**d)))
+            report.append("")
             n += 1
 #       report.append("")
     if m2:
@@ -117,6 +119,7 @@ def applicant_listing():
         for d in m2:
             report.append(_limit_line_lengths(
                 template2.format(**d)))
+            report.append("")
             n += 1
 #       report.append("")
     if m3:
@@ -126,6 +129,7 @@ def applicant_listing():
         for d in m3:
             report.append(_limit_line_lengths(
                 template3.format(**d)))
+            report.append("")
             n += 1
 #       report.append("")
     report.append(n)  # last line: # of applicants
@@ -220,8 +224,8 @@ def _header4(whom):
 
                        ])
     if whom == "exec":
-        header.extend[
-            f"Executive Committee (prepared {helpers.date})", ]
+        header.append(
+            f"Executive Committee (prepared {helpers.date})")
         header.append("=" * len(header[0]))
 
     if whom == "applicants":
