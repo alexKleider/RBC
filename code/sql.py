@@ -558,6 +558,7 @@ def get_rec_by_ID(id_, keys=None):
 
 def get_applicant(personID):
     """ Returns data from People & Applicant tables"""
+    ## TO DO: add sponsor data
     file = "Sql/app_w_dates_f.sql"
     mapping = {"personID": personID, }
     return get_rec(file, mapping)

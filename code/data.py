@@ -372,6 +372,10 @@ def get_all_app_info():
                      replace_periods=True)
     return ret
 
+def collect_sponsors(applicant_mapping):
+    return sql.get_rec("Sql/sponsors_apID_f.sql",
+                    applicant_mapping)
+
 
 def get_highest_ID():
     """

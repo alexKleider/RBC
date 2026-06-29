@@ -30,6 +30,7 @@ maps = {
             "today": helpers.eightdigitdate,
             "six_mo_ago": helpers.six_months_ago,
             "personID": 250,
+            "appID": 250,
             },
         2: {
             }
@@ -40,14 +41,15 @@ query_file = sys.argv[1]
 if len(sys.argv)>2:
     mapping = sys.argv[2]
     try:
-        mapping = maps[int(mappings)]
+        mapping = maps[int(maps)]
     except TypeError:
         mapping = json.loads(mapping)
 else:
     mapping = dict(
         today= helpers.eightdigitdate,
         six_mo_ago= helpers.six_months_ago,
-        personID= 250,
+        appID= 249,
+        personID=249,
                    )
 
 def get_rec(query_file=query_file, mapping=mapping):

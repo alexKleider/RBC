@@ -93,7 +93,7 @@ def create_person():
     else:
         print("logic/create_person: person is False")
 
-def get_sponsors():
+def get_sponsors():  
     """
     Prompts for two People table records and
     returns a mapping including both with
@@ -122,7 +122,8 @@ def get_sponsors():
 
 def add_sponsors(applicant):
     """
-    Adds sponsor data to applicant mapping.
+    Adds sponsor data to new applicant mapping.
+    ! Use collect_sponsors for existing applicant. !
     Also adds first 3 date keys all /w empty values
     Does _not_ change the data base!
     """
@@ -130,7 +131,7 @@ def add_sponsors(applicant):
     yn = input("Enter sponsor data (yY) or collect from file?: ")
     if not (yn and yn[0] in ("yY")): 
         return helpers.load_json_file("B_sponsors_incl.json")
-    sponsors = get_sponsors()
+    sponsors = get_sponsors()  # user input
     ap_mapping = {
           "s1_ID": sponsors["s1_personID"],
           "s1_first": sponsors["s1_first"],
@@ -149,6 +150,17 @@ def add_sponsors(applicant):
     ret = applicant | ap_mapping 
     helpers.dump2json(ret, "B_sponsors_incl.json")
     return ret
+
+def collect_sponsors(app_mapping):
+    """
+    Sponsor data (following keys:
+        S1_personID, S1_first, S1_last, S1_email,
+        S2_personID, S2_first, S2_last, S2_email)
+    are added to app_mapping which must contain
+    a value for "A_personID"
+    """
+    res = data.collect_sponsors(app_mapping)
+    return app_mapping | res
 
 def add_dates(applicant):
     """
@@ -218,6 +230,7 @@ def store_applicant(mapping):
 
 def enter_applicant():
     """
+    !!! NOT USED !!!
     Step by step creates an applicant mapping
     and then stores it into the data base.
     Also creates appropriate letter to applicant.
@@ -250,7 +263,7 @@ def pick_applicant(id_=None):
 
 def update_applicant():
     """
-    ### INCOMPLETE ###
+    ### INCOMPLETE   Doesn't do letters. ###  
     Provides for addition of dates to Applicant table
     and Status table updates
     If not <id_>, calls get_person to get an ID
@@ -277,15 +290,16 @@ def update_applicant():
     helpers.dump2json(mapping,    # dump
             "applicant2update.json")
     # get the first vacant key ==> key2fill
+    # used to specify applicants status...
     ret = {}
     keys = list(mapping.keys())
     date_keys = keys[-8:]
     date_slot = None
-    for date_key in date_keys:
+    for date_key in date_keys:  # finds first empty date slot
         if not mapping[date_key]:  # found key2fill
-            key2update = date_key
+            key2update = date_key  # ..first empty key
             break  # key2update is 1st empty date_key
-    # determine date status change took place...
+    # user input: date the status change took place...
     # set up user interface:
     header=f"{mapping['A_first']} {mapping['A_last']}"
     if mapping["A_suffix"]:
@@ -300,12 +314,12 @@ def update_applicant():
     # store data /w dates ...
     helpers.dump2json(mapping,    # dump
             "applicant_w_new_date.json")
-    # update Applicant table with new date...
+    # 1st update Applicant table with new date...
 ######   def add_date(personID, date_key, date):
     date_key = date_key.split("_")[1]
     data.add_date(mapping["A_personID"],
                 date_key, mapping["date"])
-    # now need to update Person_Status table
+    # now need 1 update & 1 insertion re Person_Status table
     # next 2 vars must match Sql/ asuc_f and asuo_fff
     mapping["status2open"] =  key_status_mapping[
                                       date_key]
@@ -316,6 +330,12 @@ def update_applicant():
             "applicant_w_stati2change.json")
     mapping["personID"] = mapping["A_personID"]
     data.update_applicant_status(mapping)
+    # ^ updates and inserts new entry in Applicant table
+    # need to add sponsor data!!
+    mapping = collect_sponsors(mapping)
+    # pass info to letters to create emails
+    letters.generate_letter(mapping)
+
 
 
 def ck_get_sponsors():
@@ -354,7 +374,16 @@ def main():
     print(f"Finished running {cmd.__name__} ==> ", end='')
     print(res)
 
+def ck_collect_sponsors():
+    app_mapping = {"A_personID": 250,
+                   }
+    res = collect_sponsors(app_mapping)
+    for key, val in res.items():
+        print(f"{key}: {val}")
+    pass
+
 if __name__ == "__main__":
     print("Running code/applicants.py")
-    main()
+#   main()
+    ck_collect_sponsors()
 

@@ -297,9 +297,14 @@ Please let us know if this should be corrected and, if so, to what.
 
 def generate_letter(mapping):
     """
-    <mapping> must contain all info needed:
+    <mapping> provide recipient and sponsor data
+    from which letter can be generated.
+    Additional info needed:
     letter body, date, recipient, cc, bcc,
     and any letter content inserts.
+
+        S1_personID, S1_first, S1_last, S1_email,
+        S2_personID, S2_first, S2_last, S2_email)
     """
     letter = letter_bodies[mapping["letter_body"]]
     body = body.format(**mapping)

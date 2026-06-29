@@ -207,7 +207,6 @@ def _header4(whom):
     i = data.numbers("inactive")
     a = data.numbers("applicants")
     header = []
-
     if whom == "web":
         header = [f"Membership Roster (as of {helpers.date})", ]
         header.append("=" * len(header[0]))
@@ -220,27 +219,25 @@ def _header4(whom):
         "has expressed the intent to retire from the club.",
         "Member ID's are included for the data base manager's",
         "convenience."
-
-
                        ])
-    if whom == "exec":
+    elif whom == "exec":
         header.append(
             f"Executive Committee (prepared {helpers.date})")
         header.append("=" * len(header[0]))
 
-    if whom == "applicants":
+    elif whom == "applicants":
         header.append(
             f"Applicants (currently {a} in number"
             + f" as of {helpers.date})")
         header.append("=" * len(header[0]))
 
-    if whom == "honorary":
+    elif whom == "honorary":
         header.append("")
         header.append(f"There are {h} Honorary Members")
 #       print('-' * len(header[:-1]))
         header.append('-' * len(header[-1]))
 
-    if whom == "inactive":
+    elif whom == "inactive":
         header.append("")
         header.append(f"There are {i} Inactive Members")
         header.append('-' * len(header[-1]))
