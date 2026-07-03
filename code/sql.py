@@ -9,6 +9,7 @@ Code involving specific queries should be in code/data.py
 
 import os
 import csv
+import json
 import shutil
 import sqlite3
 try: import helpers
@@ -203,34 +204,74 @@ def dicts_from_query(query, from_file=False,
             query = q_file.read()
     if not keys:
         keys = keys_from_query(query,
-                       replace_periods=replace_periods)
+                   replace_periods=replace_periods)
     res = fetch(query, from_file=False)
     for entry in res:
         d = dict(zip(keys, entry))
         yield d
 
+def get_f_query(query_file, f_mapping):
+    """
+    <query_file> is a .sql file needing formatting.
+    <f_mapping> provides the needed values: it can
+    be specified as a dict variable or the name of
+    a JSON file.
+    """
+    try:
+        open(f_mapping, 'r') as f:
+            mapping = json.read(f)[0]
+    except ValueError:
+        mapping = f_mapping
+    with open(query_file, 'r') as stream:
+        query = stream.read().format(**mapping)
+    return query
+
+def ff_query2json(ff_query_file, ff_mapping, j_file):
+    """
+    Runs the query found in <ff_query_file>
+    (with place holders populated by ff_mapping)
+    and sends results to a json_file <j_file>.
+    See get_f_query re f_mapping.
+    Commented out part for debugging.
+    """
+    query = get_f_query(ff_query_file,
+                                 ff_mapping)
+    formatted_f_query = f"formatted_{ff_query_file}"
+    with open(formatted_f_query, 'w') as f:
+        f.write(query)
+    print(f"Formatted query sent to '{formatted_f_query}'")
+    j_file_name = query2json(query, j_file)
+    print(f"Query results sent to '{j_file}'.")
 
 def query2dict_listing(query, keys=False,
-                       from_file=False):
+                       from_file=False,
+                       replace_periods=True):
     """
-    Returns query result as a (could be empty!) list of dicts
-    (which can be dumped into a json file.)
-    A listing of <keys> can be supplied; defaults to a call
-    to keys_from_query. A call to keys_from_query is another
-    way the user can generate the listing.
+    Returns query result as a (could be empty!) list
+    of dicts (which can be dumped into a json file.)
+    A listing of <keys> can be supplied; defaults to
+    a call to keys_from_query.
+    A call to keys_from_query is another way the user
+    can generate the listing.
     Fails if len(keys)!=length of tupples
     """
     if from_file:
         query = import_query(query)
     ret = []
     if not keys:
-        keys = keys_from_query(query)
+        keys = keys_from_query(query,
+                        replace_periods=replace_periods)
     res = fetch(query, from_file=from_file)
     for entry in res:
         d = dict(zip(keys, entry))
         ret.append(d)
     return ret
 
+def query2json(query, j_file):
+    listing = query2dict_listing(query)
+    with open(j_file, "w") as f:
+        json.dump(listing, f, indent=2)
+        return f.name
 
 def query2dicts(query, from_file=False):
     """

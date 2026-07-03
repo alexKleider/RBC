@@ -783,6 +783,9 @@ def get_fieldnames(csv_file: "name of csv file", report=True
         dict_reader = csv.DictReader(file_object, restkey='extra')
         return dict_reader.fieldnames
 
+def query2json(query, j_file):
+    pass
+
 
 def dump2csv_file(listing, keys=None,
                          file_name="new_csv.csv"):

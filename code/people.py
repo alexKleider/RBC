@@ -8,12 +8,29 @@
 from code import helpers
 from code import data
 
-def get_lastID():
+def create_person():  # SHOULD BE MOVED INTO People MODULE
     """
-    Returns the last entered personID.
-    Don't need a user interface version of this.
+    Attempts to Create an entry into the People table
+    & Return mapping with personID value.
+    Returns None if attempt fails.
     """
-    return data.get_highest_ID()
+    yn = input("Enter person data (yY) or collect from file?: ")
+    if (yn and yn[0] in ("yY")): 
+        keys = data.person_keys()
+        mapping = {key: "" for key in keys}
+        person = data.entries(mapping,
+            header="Adding New Person to People Table",
+            text="Add values (empty strings accepted)... ")
+    else:
+        person = helpers.load_json_file("A_new_person.json") 
+    if person:
+        data.put_person(person)
+        helpers.dump2json(person,
+                          "A_new_person.json")
+        person["personID"] = get_lastID()
+        return person
+    else:
+        print("logic/create_person: person is False")
 
 def get_person():
     """
@@ -37,6 +54,21 @@ def get_person():
                     text="Try again? (yn): ")
             if not yn:
                 return
+
+def get_lastID():
+    """
+    Returns the last entered personID.
+    Don't need a user interface version of this.
+    """
+    return data.get_highest_ID()
+
+def assign_status(personID, stati2assign):
+    """
+    Assumes <personID> already exists in the People table.
+    Makes entries into the <Person_Status> table with
+    -begin- date defaulting to -today-.
+    """
+    pass
 
 def in_good_standing(personID):
     """ returns True (member for >= 1yr) or False """

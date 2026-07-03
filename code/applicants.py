@@ -14,6 +14,8 @@ try: import helpers
 except ImportError: from code import helpers
 try: import data
 except ImportError: from code import data
+try: import people
+except ImportError: from code import people
 try: import letters
 except ImportError: from code import letters
 
@@ -69,30 +71,6 @@ for_reference = '''
 30|com|Committee member
 '''
 
-def create_person():
-    """
-    Attempts to Create an entry into the People table
-    & Return mapping with personID value.
-    Returns None if attempt fails.
-    """
-    yn = input("Enter person data (yY) or collect from file?: ")
-    if (yn and yn[0] in ("yY")): 
-        keys = data.person_keys()
-        mapping = {key: "" for key in keys}
-        person = data.entries(mapping,
-            header="Adding New Person to People Table",
-            text="Add values (empty strings accepted)... ")
-    else:
-        person = helpers.load_json_file("A_new_person.json") 
-    if person:
-        data.put_person(person)
-        helpers.dump2json(person,
-                          "A_new_person.json")
-        person["personID"] = get_lastID()
-        return person
-    else:
-        print("logic/create_person: person is False")
-
 def get_sponsors():  
     """
     Prompts for two People table records and
@@ -104,7 +82,7 @@ def get_sponsors():
         while len(sponsors)<2:
             data.announce(header="Need 2 sponsors..",
               text=f"Enter sponsor #{len(sponsors)+1}:")
-            sponsor = get_person()
+            sponsor = people.get_person()
             if sponsor:
                 pass
                 sponsors.append(sponsor)
@@ -207,7 +185,7 @@ def create_applicant_mapping():
     as applicable but...
     DOES NOT make any other table entries.
     """
-    mapping = create_person()
+    mapping = people.create_person()
     if not mapping: return
     mapping = add_sponsors(mapping)
     if not mapping: return
@@ -235,7 +213,7 @@ def enter_applicant():
     and then stores it into the data base.
     Also creates appropriate letter to applicant.
     """
-    mapping = create_person()
+    mapping = people.create_person()
     mapping = add_sponsors(mapping)
     mapping = add_dates(mapping)
     store_applicant(mapping)
@@ -256,7 +234,7 @@ def pick_applicant(id_=None):
     appl = data.entries(ap_map,
         header="Pick Applicant",
         text="Provide name clues.")
-    rec = get_person()
+    rec = people.get_person()
     id_ = rec["personID"]
     if not id_: return
     return data.get_applicant(id_)
@@ -266,7 +244,7 @@ def update_applicant():
     ### INCOMPLETE   Doesn't do letters. ###  
     Provides for addition of dates to Applicant table
     and Status table updates
-    If not <id_>, calls get_person to get an ID
+    If not <id_>, calls people.get_person to get an ID
     Returns None if fails to find an applicant.
     """
     # first must pick an applicant...
@@ -360,6 +338,14 @@ def ck_new_applicant():
     else:
         print(f"new_applicant returned {mapping}")
 
+def ck_collect_sponsors():
+    app_mapping = {"A_personID": 250,
+                   }
+    res = collect_sponsors(app_mapping)
+    for key, val in res.items():
+        print(f"{key}: {val}")
+    pass
+
 def main():
     cmds_available = [
         get_sponsors,
@@ -374,16 +360,8 @@ def main():
     print(f"Finished running {cmd.__name__} ==> ", end='')
     print(res)
 
-def ck_collect_sponsors():
-    app_mapping = {"A_personID": 250,
-                   }
-    res = collect_sponsors(app_mapping)
-    for key, val in res.items():
-        print(f"{key}: {val}")
-    pass
-
 if __name__ == "__main__":
     print("Running code/applicants.py")
-#   main()
-    ck_collect_sponsors()
+    main()
+#   ck_collect_sponsors()
 
