@@ -33,14 +33,14 @@ except ImportError:
     from code import sql as sql_code
 
 maps = {
-        1: {
+        0: {
             "today": helpers.eightdigitdate,
             "six_mo_ago": helpers.six_months_ago,
             "personID": 250,
             "appID": 250,
             "personID": 250
             },
-        2: {
+        1: {
             }
             ,
         }
@@ -48,16 +48,18 @@ maps = {
 qfa = sys.argv[1]  # query file arg
 
 if len(sys.argv)>2:
+    print("more than two args so see if it is an int...")
     mapping = sys.argv[2]
     try:
         mapping = maps[int(maps)]
     except TypeError:
+        print("Not an int so load a json file")
         mapping = json.load(mapping)[0]
 else:
-    mapping = maps[1]
+    mapping = maps[0]
 
 if __name__ == "__main__":
     print(f"Running run_query_w_map.py on {qfa}")
-    j_file = "j_file2read.json"
-    print(sql_code.ff_query2json(qfa, maps[1], j_file))
+    j_file = "query_result.json"
+    print(sql_code.ff_query2json(qfa, mapping, j_file))
 

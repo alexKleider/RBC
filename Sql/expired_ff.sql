@@ -1,6 +1,7 @@
 /* File: Sql/expired_f6.sql (31 * 6 = 186)
 Lists any applicants who have not put in their
-6 meeting since the time of ther first meeting */
+6 meeting since the time of ther first meeting.
+-- already using P and Sn for prefixes */
 
 SELECT P.personID, P.first, P.last, P.suffix,
         S1.first, S1.last, S1.suffix,

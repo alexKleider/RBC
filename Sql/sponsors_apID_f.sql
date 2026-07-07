@@ -1,6 +1,8 @@
-/* Sql/sponsors_apID_f.sql */
+/* Sql/sponsors_apID_f.sql
 -- Requires applicant's ID to be specified
 -- Returns sponsor data.
+-- uses "A_personID" as a mapping key, should
+-- change to "P_personID" */
 
 SELECT 
     S1.personID, S1.first, S1.last, S1.email,

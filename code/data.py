@@ -63,9 +63,15 @@ def get_hints(header="People Table Lookup",
       text=text)
 
 def update_applicant_status(mapping):
+    """
+    Currently mapping uses A_ prefix,
+    will want to change to P_prefix.
+    """
+    # close current status window...
     sql.fetch_d_query("Sql/asuc_f.sql",
                       mapping,
                       commit=True)
+    # open new status window...
     sql.fetch_d_query("Sql/asuo_fff.sql",
                       mapping,
                       commit=True)

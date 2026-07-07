@@ -217,11 +217,11 @@ def get_f_query(query_file, f_mapping):
     be specified as a dict variable or the name of
     a JSON file.
     """
-    try:
-        open(f_mapping, 'r') as f:
-            mapping = json.read(f)[0]
-    except ValueError:
+    if type(f_mapping) == dict:
         mapping = f_mapping
+    else:
+        with open(f_mapping, 'r') as f:
+            mapping = json.read(f)[0]
     with open(query_file, 'r') as stream:
         query = stream.read().format(**mapping)
     return query
@@ -236,10 +236,10 @@ def ff_query2json(ff_query_file, ff_mapping, j_file):
     """
     query = get_f_query(ff_query_file,
                                  ff_mapping)
-    formatted_f_query = f"formatted_{ff_query_file}"
-    with open(formatted_f_query, 'w') as f:
+    formatted_query_file = ff_query_file.split('/')[-1]
+    with open(formatted_query_file, 'w') as f:
         f.write(query)
-    print(f"Formatted query sent to '{formatted_f_query}'")
+    print(f"Formatted query sent to '{formatted_query_file}'")
     j_file_name = query2json(query, j_file)
     print(f"Query results sent to '{j_file}'.")
 

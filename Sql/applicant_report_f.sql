@@ -1,5 +1,9 @@
-/* Sql/applicant_report_f.sql */
+/* Sql/applicant_report_f.sql
 -- Requires {today} to be specified 
+Already uses P for people table rather than A
+Consider changing changing Ap to A for consistency
+*/
+
 SELECT
     P.personID, PS.statusID, P.last, P.first, P.suffix,
     P.phone, P.address, P.town, P.state, P.postal_code,

@@ -1,9 +1,12 @@
-/* File: Sql/leadership_f.sql */
+/* File: Sql/leadership_f.sql
+-- already using P_ prefix for People table,
+-- PS for Person_Status table
+-- and S for Stati table */
 
-SELECT P.personID, P.first, P.last, P.suffix,
-    S.statusID,
-    S.text, PS.begin, PS.end
-    FROM People as P
+SELECT
+    S.text, S.statusID, PS.begin, PS.end,
+     P.personID, P.first, P.last, P.suffix
+FROM People as P
 JOIN Person_Status as PS 
 ON PS.personID = P.personID 
 JOIN Stati as S

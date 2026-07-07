@@ -144,19 +144,23 @@ def add_dates(applicant):
     """
     Updates the mapping.
     Does _not_ change the data base!
-    Add 0-3 of the Applicant table date entries.
+    Add 0-?? of the Applicant table date entries.
     and on basis of them adds "statusID" to mapping.
 
     """
     ap_mapping = ui.add_info(applicant,
                 "app_rcvd", "fee_rcvd", "meeting1",
+                "meeting2", "meeting3", "approved",
+                "dues_paid", "notified",
                 header="Applicant Dates",
                 text="Add dates as appropriate:")
     if not (isinstance(applicant, dict) 
             and isinstance(ap_mapping, dict)):
         print("major problem in code/logic.add_dates")
         return
-    for key in ("meeting1", "fee_rcvd", "app_rcvd"):
+    for key in ("notified", "dues_paid", "approved", 
+                "meeting3", "meeting2","meeting1",
+                "fee_rcvd", "app_rcvd"):
         if ap_mapping[key]:
             ap_mapping["statusID"] = key_status_mapping[key]
             ap_mapping["begin"] = ap_mapping[key]
@@ -312,7 +316,7 @@ def update_applicant():
     # need to add sponsor data!!
     mapping = collect_sponsors(mapping)
     # pass info to letters to create emails
-    letters.generate_letter(mapping)
+    letters.generate_letter(_letter_, mapping)
 
 
 

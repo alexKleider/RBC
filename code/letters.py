@@ -109,7 +109,7 @@ Blah, blah, blah.
 More to say.
 
 There's a second paragraph to add.
-""",
+""",  # no mapping required
     app_fee_pending="""
 The Club is now in receipt of your application but there
 is still the ${app_fee} application fee to be submitted.
@@ -119,7 +119,7 @@ I will communicate further.
 In the mean time please keep in touch with your sponsors
 who have the duty to shepherd you through the application
 process.
-""",
+""",  # mapping must defile {app_fee}
 
     app_complete="""
 Your application for membership in the Bolinas Rod and
@@ -141,7 +141,7 @@ Looking forward to seeing each other at future meetings
 held at the Club: 83 Wharf Rd., Bolinas, CA 94924
 """,
     app_w_meeting="""
-This letter is to acknowledge that our application for
+This letter is to acknowledge that your application for
 membership in the Bolinas Rod and Boat Club has been
 received, appears to be in order, and you've already 
 attended your first meeting! As Membership Chair it is
@@ -159,12 +159,18 @@ to introduce you.
 
 Looking forward to seeing each other at future meetings
 held at the Club: 83 Wharf Rd., Bolinas, CA 94924
+""",  # software must distinguish between application alone
+      # and application with 1st meeting!
+      # perhaps by checking if dates are the same.
+    meeting1="""
 """,
-    meeting_1="""
+    meeting2="""
 """,
-    meeting_2="""
-""",
-    meeting_3="""
+    meeting3="""
+Congratulations on completing your third and final qualifying meeting
+for membership in the Bolinas Rod and Boat Club! Your application will
+come before the Club's Executive Committee once a vacancy becomes
+available.
 """,  # notify exec committee
     awaiting_vacancy="""
 The Club Executive Committee has, at its last meeting,
@@ -201,7 +207,7 @@ using Venmo or sending a check to PO Box 248 (94924.)
 Upon receipt of your membership dues, I'll send you more
 information about the Club and your privileges as a
 member there of.
-""",
+""", # need prorated <dues>
     second_request_inductee_payment="""
 Your application for Club membership was approved by the
 Club Executive Committee and membership fees have been
@@ -214,7 +220,7 @@ Please send a check for ${dues} to PO Box 248 (94924.)
 """,
     # following will eventually be redacted in favour of
     # first_dues_payment_welcome
-    member="""
+    new_member="""
 As Membership Chair, it is my pleasure to welcome you
 as a new member to the Bolinas Rod and Boat Club!
 
@@ -290,23 +296,25 @@ Thanks,""",
 Mail sent to you has been returned.
 We have your mailing address as :
 {extra}
-Please let us know if this should be corrected and, if so, to what.
+Please let us know if this should be corrected and,
+if so, to what.
 """,
 )
 # ... end of letter_bodies (dict declaration.)
 
-def generate_letter(mapping):
+def generate_letter(letter, mapping):
     """
-    <mapping> provide recipient and sponsor data
-    from which letter can be generated.
-    Additional info needed:
-    letter body, date, recipient, cc, bcc,
+    <letter> will have {} replacement field keys.
+    <mapping> must provide values for all keys.
+    fields in the letter specified.
+    Typical info needed: date,
+    recipient (first, last, suffix, email),
+    cc, bcc,
     and any letter content inserts.
-
+    e.g. for letters to applicants:
         S1_personID, S1_first, S1_last, S1_email,
         S2_personID, S2_first, S2_last, S2_email)
     """
-    letter = letter_bodies[mapping["letter_body"]]
     body = body.format(**mapping)
     date = helpers.date
     salutation = (f"Dear {mapping['first']} " +
@@ -315,7 +323,6 @@ def generate_letter(mapping):
     postscripts = []
     cc = mapping["ccs"]
     bcc = mapping["bccs"]
-    pass
 
 def append_letter(mapping):
     print(

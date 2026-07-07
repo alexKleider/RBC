@@ -6,6 +6,7 @@
 Accepts a csv file and makes it look better.
 Perhaps this should be made into a function
 and moved into ==> helpers
+Can't remember why or how this is to be used!
 """
 
 import sys

@@ -1,7 +1,8 @@
 /* Sql/all_app_data_ff.sql
 * requires a mapping value for "personID" & for "today"
 - could replace: Sql/app_w_dates_f.sql
-               & Sql/appl_w_sponsors_f.sql            */
+               & Sql/appl_w_sponsors_f.sql
+Should change People AS A to People as P!!          */
 SELECT
     A.personID, A.last, A.first, A.suffix,
     A.phone, A.address, A.town, A.state,
