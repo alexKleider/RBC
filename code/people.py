@@ -8,11 +8,14 @@
 from code import helpers
 from code import data
 
-def create_person():  # SHOULD BE MOVED INTO People MODULE
+def create_person():
     """
     Attempts to Create an entry into the People table
     & Return mapping with personID value.
     Returns None if attempt fails.
+    First question only needed during debugging: it
+    allows one to have data available without having
+    to re-enter it. == A_new_person.json
     """
     yn = input("Enter person data (yY) or collect from file?: ")
     if (yn and yn[0] in ("yY")): 
@@ -25,6 +28,8 @@ def create_person():  # SHOULD BE MOVED INTO People MODULE
         person = helpers.load_json_file("A_new_person.json") 
     if person:
         data.put_person(person)
+        # for debugging purposes: saves the data so
+        # it can be retrieved next time code is run
         helpers.dump2json(person,
                           "A_new_person.json")
         person["personID"] = get_lastID()

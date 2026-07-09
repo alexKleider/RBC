@@ -3,14 +3,14 @@
     applicant's known personID
 */
 SELECT
-    A.personID, A.last, A.first, A.suffix,
-    A.phone, A.address, A.town, A.state,
-    A.postal_code, A.email,
-    AP.app_rcvd, AP.fee_rcvd, AP.meeting1, AP.meeting2,
-    AP.meeting3, AP.approved, AP.dues_paid, AP.notified
-FROM Applicants AS AP,
-     People AS A
-WHERE A.personID = {personID} -- id_
-AND   AP.personID = A.personID
+    P.personID, P.last, P.first, P.suffix,
+    P.phone, P.address, P.town, P.state,
+    P.postal_code, P.email,
+    A.app_rcvd, A.fee_rcvd, A.meeting1, A.meeting2,
+    A.meeting3, A.approved, A.dues_paid, A.notified
+FROM Applicants AS A,
+     People AS P
+WHERE P.personID = {personID} -- id_
+AND   A.personID = P.personID
 ;
 

@@ -201,6 +201,7 @@ def put_person(mapping):
     """
     Creates an entry in the data base (People table.)
     <mapping> must contain the relevant key/value pairs.
+    No prefixes!
     """
     keys = mapping.keys()
     k_listing = [ f'"{key}"' for key in keys]

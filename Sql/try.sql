@@ -1,4 +1,6 @@
-/* File: Sql/try.sql */
+/* File: Sql/try.sql
+-- I think this is the query Ventak taught me,
+-- doubt that it is used                      */
         SELECT app.first, app.last,
                   app.personID, PS.statusID,
                   sp1.first, sp1.last, PS1.statusID,

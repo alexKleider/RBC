@@ -135,7 +135,7 @@ def collect_sponsors(app_mapping):
         S1_personID, S1_first, S1_last, S1_email,
         S2_personID, S2_first, S2_last, S2_email)
     are added to app_mapping which must contain
-    a value for "A_personID"
+    a value for "P_personID"
     """
     res = data.collect_sponsors(app_mapping)
     return app_mapping | res
@@ -203,13 +203,14 @@ def store_applicant(mapping):
     Applicant, Person_Status, +/- Receipts table entries.
     People table entry has already been done and
     key/value pairs assigned to <mapping>.
+    Check if using appropriate prefixes i.e. P, not A
     """
     data.create_applicant_entry(mapping)
     data.create_person_status_entry(mapping)
     data.create_app_receipts_entry(mapping)
     add_letter(mapping)
 
-
+redacted = '''
 def enter_applicant():
     """
     !!! NOT USED !!!
@@ -222,6 +223,7 @@ def enter_applicant():
     mapping = add_dates(mapping)
     store_applicant(mapping)
     add_letter(mapping)
+'''
 
 def pick_applicant(id_=None):
     """
@@ -267,6 +269,8 @@ def update_applicant():
         return
     # get that applicants data ( > mapping)
     mapping = pick_applicant(id_)
+    # following 2 lines no longer relavent...
+    # trying to switch to P_ rather than A_
     ## keys have "A_" or "AP_" prefixed 
     # store data (just during development..
     helpers.dump2json(mapping,    # dump
@@ -283,9 +287,9 @@ def update_applicant():
             break  # key2update is 1st empty date_key
     # user input: date the status change took place...
     # set up user interface:
-    header=f"{mapping['A_first']} {mapping['A_last']}"
-    if mapping["A_suffix"]:
-        header = header + mapping["A_suffix"]
+    header=f"{mapping['P_first']} {mapping['P_last']}"
+    if mapping["P_suffix"]:
+        header = header + mapping["P_suffix"]
     text="Enter date (yyyymmdd)"
     # get key (of new data/date) to present to user...
     d = {"new_date": "", }
@@ -299,7 +303,7 @@ def update_applicant():
     # 1st update Applicant table with new date...
 ######   def add_date(personID, date_key, date):
     date_key = date_key.split("_")[1]
-    data.add_date(mapping["A_personID"],
+    data.add_date(mapping["P_personID"],
                 date_key, mapping["date"])
     # now need 1 update & 1 insertion re Person_Status table
     # next 2 vars must match Sql/ asuc_f and asuo_fff
@@ -310,7 +314,7 @@ def update_applicant():
     # update old & create new entry: Person_Status table:
     helpers.dump2json(mapping,
             "applicant_w_stati2change.json")
-    mapping["personID"] = mapping["A_personID"]
+    mapping["personID"] = mapping["P_personID"]
     data.update_applicant_status(mapping)
     # ^ updates and inserts new entry in Applicant table
     # need to add sponsor data!!
@@ -343,7 +347,7 @@ def ck_new_applicant():
         print(f"new_applicant returned {mapping}")
 
 def ck_collect_sponsors():
-    app_mapping = {"A_personID": 250,
+    app_mapping = {"P_personID": 250,
                    }
     res = collect_sponsors(app_mapping)
     for key, val in res.items():

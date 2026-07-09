@@ -223,10 +223,12 @@ def get_f_query(query_file, f_mapping):
         with open(f_mapping, 'r') as f:
             mapping = json.read(f)[0]
     with open(query_file, 'r') as stream:
-        query = stream.read().format(**mapping)
+        query = looseSQLcomments(stream.read())
+        query = query.format(**mapping)
     return query
 
-def ff_query2json(ff_query_file, ff_mapping, j_file):
+def ff_query2json(ff_query_file, ff_mapping,
+                  j_file, q_file=None):
     """
     Runs the query found in <ff_query_file>
     (with place holders populated by ff_mapping)
@@ -236,11 +238,12 @@ def ff_query2json(ff_query_file, ff_mapping, j_file):
     """
     query = get_f_query(ff_query_file,
                                  ff_mapping)
-    formatted_query_file = ff_query_file.split('/')[-1]
-    with open(formatted_query_file, 'w') as f:
-        f.write(query)
-    print(f"Formatted query sent to '{formatted_query_file}'")
-    j_file_name = query2json(query, j_file)
+    if q_file:
+        formatted_query_file = ff_query_file.split('/')[-1] + ".res"
+        with open(formatted_query_file, 'w') as f:
+            f.write(query)
+        print(f"Formatted query sent to '{formatted_query_file}'")
+        j_file_name = query2json(query, j_file)
     print(f"Query results sent to '{j_file}'.")
 
 def query2dict_listing(query, keys=False,

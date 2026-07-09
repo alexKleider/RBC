@@ -1,8 +1,8 @@
 /* Sql/sponsors_apID_f.sql
 -- Requires applicant's ID to be specified
 -- Returns sponsor data.
--- uses "A_personID" as a mapping key, should
--- change to "P_personID" */
+-- used "A_personID" as a mapping key,
+-- changed to "P_personID" */
 
 SELECT 
     S1.personID, S1.first, S1.last, S1.email,
@@ -11,7 +11,7 @@ FROM
      People AS S1, --sponsor #1     | people table
      People AS S2, --sponsor #2     |
      Applicants AS Ap -- the applicant table
-WHERE Ap.personID = {A_personID}
+WHERE Ap.personID = {P_personID}
 AND   S1.personID = Ap.sponsor1ID
 AND   S2.personID = Ap.sponsor2ID
 ;

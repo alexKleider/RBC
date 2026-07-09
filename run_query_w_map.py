@@ -59,7 +59,7 @@ else:
     mapping = maps[0]
 
 if __name__ == "__main__":
-    print(f"Running run_query_w_map.py on {qfa}")
     j_file = "query_result.json"
-    print(sql_code.ff_query2json(qfa, mapping, j_file))
+    print(sql_code.ff_query2json(qfa, mapping, j_file,
+                                q_file="query_text"))
 
