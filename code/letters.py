@@ -110,6 +110,7 @@ More to say.
 
 There's a second paragraph to add.
 """,  # no mapping required
+
     app_fee_pending="""
 The Club is now in receipt of your application but there
 is still the ${app_fee} application fee to be submitted.
@@ -119,7 +120,7 @@ I will communicate further.
 In the mean time please keep in touch with your sponsors
 who have the duty to shepherd you through the application
 process.
-""",  # mapping must defile {app_fee}
+""",  # mapping must define {app_fee}
 
     app_complete="""
 Your application for membership in the Bolinas Rod and
@@ -139,7 +140,8 @@ to introduce you.
 
 Looking forward to seeing each other at future meetings
 held at the Club: 83 Wharf Rd., Bolinas, CA 94924
-""",
+""",  # no special mapping values required
+
     app_w_meeting="""
 This letter is to acknowledge that your application for
 membership in the Bolinas Rod and Boat Club has been
@@ -185,29 +187,32 @@ for payment of dues and once paid you will become a full
 fledged member!
 
 You're almost there; "as good as" for all intents and
-purposes!""",
+purposes!""",  # no special mapping values required
+
     vacancy_open="""
 It's my pleasure to report that a vacancy has come up
 and so you can now become a member.
 "Welcome aboard!"
 All that remains for your membership to take effect is
-payment of ${dues} in prorated dues. This can be done
+payment of ${prorated_dues} in prorated dues. This can be done
 using Venmo or sending a check to PO Box 248 (94924.)
 Upon receipt of your membership dues, I'll send you more
 information about the Club and your privileges as a
 member there of.
-""",
+""",  # mapping must provide a value for prorated_dues
+
     approved="""
 The Club Executive Committee has, at its last meeting,
 approved your application for Club membership.
 "Welcome aboard!"
 All that remains for your membership to take effect is
-payment of ${dues} in prorated dues. This can be done
+payment of ${prorated_dues} in prorated dues. This can be done
 using Venmo or sending a check to PO Box 248 (94924.)
 Upon receipt of your membership dues, I'll send you more
 information about the Club and your privileges as a
 member there of.
-""", # need prorated <dues>
+""",   # mapping must provide a value for prorated_dues
+
     second_request_inductee_payment="""
 Your application for Club membership was approved by the
 Club Executive Committee and membership fees have been
@@ -216,8 +221,9 @@ received you are not yet a member.  This could create a
 problem for the Exec committee since there are applicants
 ready to take the spot that you would take if, but only
 if, the dues are paid.
-Please send a check for ${dues} to PO Box 248 (94924.)
-""",
+Please send a check for ${prorated_dues} to PO Box 248 (94924.)
+""",   # mapping must provide a value for prorated_dues
+
     # following will eventually be redacted in favour of
     # first_dues_payment_welcome
     new_member="""
@@ -278,6 +284,7 @@ you have chosen to leave the club.
 If you have a club house key (issued by Ralph) please
 return it to the Bolinas Rod & Boat Club, PO Box 248,
 Bolinas, CA 94924.""",
+
     expired_application="""
 With considerable regret it is my duty to inform you that
 it's been more than six months since your membership
@@ -287,18 +294,21 @@ causes your application to expire.
 If you still wish to be a member of the Bolinas Rod and
 Boat Club the application process must begin again and
 I suggest you work closely with your sponsors.""",
+
     bad_email="""
 Emails sent to you at "{email}" are being rejected.
 Can you please help sort this out by contacting us
 at rodandboatclub@gmail.com?
-Thanks,""",
+Thanks,""",  # mapping must (probably does) include email
+
     bad_address="""
 Mail sent to you has been returned.
 We have your mailing address as :
-{extra}
+    {address}, {town},
+    {state}, {postal_code}, {country}
 Please let us know if this should be corrected and,
 if so, to what.
-""",
+""",  # requires values for the 5 address related keys
 )
 # ... end of letter_bodies (dict declaration.)
 

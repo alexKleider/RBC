@@ -212,8 +212,7 @@ def _header4(whom):
         header.append("=" * len(header[0]))
         header.extend([ "",
         f"Currently active membership stands at {tm} of which",
-        f"{gs} are 'members in good standing' while {f} ",
-        f"(those indicated by an (*) asterix) are still",
+        f"{f} (those indicated by an (*) asterix) are still",
         "within their first year of membership.",
         "A (^) caret (if present) indictes an active member who",
         "has expressed the intent to retire from the club.",

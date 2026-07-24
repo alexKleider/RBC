@@ -24,16 +24,17 @@ app_letters = "app_letters.txt"  ## *
 
 ap_fee = 25
 key_status_mapping = { # entry to update:
-#       "new_member": 11, 
-        "notified":    9,  # acknowledged
-        "dues_paid":   8,  # dues_paid, acknowledge
-        "approved":    7,  # needs notified
-        "meeting3":    6,  # attended 3 meeting
-        "meeting2":    5,  # attended 2 meeting
-        "meeting1":    4,  # attended 1 meeting
-#       "no_meetings": 
-#                       3,  # no meetngs yet
-        "no_meetings":  3,
+#       "new_member":  11,  # special situation
+# after fees are paid & acknowledged we want to set
+# begin and end for status 11 and begin a year later
+# for status 15.
+        "notified":     9,  # acknowledged
+        "dues_paid":    8,  # dues_paid, acknowledge
+        "approved":     7,  # needs notified
+        "meeting3":     6,  # attended 3 meeting
+        "meeting2":     5,  # attended 2 meeting
+        "meeting1":     4,  # attended 1 meeting
+#       "no_meetings":  3,  # no meetngs yet
         "fee_rcvd":     2,  # needs acknowledged
         "app_rcvd":     1,
 
@@ -100,34 +101,23 @@ def get_sponsors():
 
 def add_sponsors(applicant):
     """
-    Adds sponsor data to new applicant mapping.
-    ! Use collect_sponsors for existing applicant. !
-    Also adds first 3 date keys all /w empty values
+    Adds sponsor data and first 3 date keys (/w empty
+    vals) to a new person mapping.
     Does _not_ change the data base!
     """
-
-    yn = input("Enter sponsor data (yY) or collect from file?: ")
+    yn = input(
+        "Enter sponsor data (yY) or collect from file?: ")
     if not (yn and yn[0] in ("yY")): 
-        return helpers.load_json_file("B_sponsors_incl.json")
+        return helpers.load_json_file(
+                "B_sponsors_incl.json")
     sponsors = get_sponsors()  # user input
-    ap_mapping = {
-          "s1_ID": sponsors["s1_personID"],
-          "s1_first": sponsors["s1_first"],
-          "s1_last": sponsors["s1_last"],
-          "s1_suffix": sponsors["s1_suffix"],
-          "s1_email": sponsors["s1_email"],
-          "s2_ID": sponsors["s2_personID"],
-          "s2_first": sponsors["s2_first"],
-          "s2_last": sponsors["s2_last"],
-          "s2_suffix": sponsors["s2_suffix"],
-          "s2_email": sponsors["s2_email"],
-          "app_rcvd": "",
-          "fee_rcvd": "",
-          "meeting1": "",
-                  }
-    ret = applicant | ap_mapping 
-    helpers.dump2json(ret, "B_sponsors_incl.json")
-    return ret
+    for key in sponsors.keys():
+        applicant[key] = sponsors[key]
+    applicant["app_rcvd"] = ""
+    applicant["fee_rcvd"] = ""
+    applicant["meeting1"] = ""
+    helpers.dump2json(applicant, "B_sponsors_incl.json")
+    return applicant
 
 def collect_sponsors(app_mapping):
     """
@@ -199,31 +189,30 @@ def create_applicant_mapping():
 
 def store_applicant(mapping):
     """
-    <mapping> contains all required applicant data.
-    Applicant, Person_Status, +/- Receipts table entries.
-    People table entry has already been done and
+    <mapping> (comes from a call to people.create_person)
+    and is used to create appropriate entries into
+    the Applicant, Person_Status, +/- Receipts tables
     key/value pairs assigned to <mapping>.
-    Check if using appropriate prefixes i.e. P, not A
     """
+#   Check if using appropriate prefixes i.e. P, not A
     data.create_applicant_entry(mapping)
     data.create_person_status_entry(mapping)
     data.create_app_receipts_entry(mapping)
     add_letter(mapping)
 
-redacted = '''
-def enter_applicant():
+## enter_applicnat does the same???
+def enter_applicant():     # called by main.py
     """
-    !!! NOT USED !!!
-    Step by step creates an applicant mapping
-    and then stores it into the data base.
-    Also creates appropriate letter to applicant.
+    Creates a Person entry, and to its mapping
+    adds necessary Applicant data before calling 
+    <store_applicant(mapping)> which populates
+    the Applicant, Person_Status and Receipts tables
+    and also creates a letter if appropriate.
     """
     mapping = people.create_person()
     mapping = add_sponsors(mapping)
     mapping = add_dates(mapping)
     store_applicant(mapping)
-    add_letter(mapping)
-'''
 
 def pick_applicant(id_=None):
     """
@@ -355,6 +344,9 @@ def ck_collect_sponsors():
     pass
 
 def main():
+    """
+    A scaled down version of ../main.py
+    """
     cmds_available = [
         get_sponsors,
         enter_applicant,

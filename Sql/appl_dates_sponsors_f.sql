@@ -1,5 +1,7 @@
 /* Sql/appl_dates_sponsors_f.sql */
 -- Requires {today} to be specified 
+-- Provides all data for all current applicants
+-- REDACTED; replaced by Sql/all_applicants_f.sql
 SELECT
     P.personID, PS.statusID, P.last, P.first, P.suffix,
 --  P.phone, P.address, P.town, P.state, P.postal_code,
