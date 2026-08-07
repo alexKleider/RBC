@@ -20,11 +20,11 @@ FROM People AS P, Applicants AS AP,
 WHERE P.personID = {personID}    AND A.personID = P.personID
 AND  S1.personID = A.sponsor1ID AND S2.personID = A.sponsor2ID
 AND  ApS.personID = P.personID   AND A.notified = ""
-AND  ApS.begin < "{today}"       AND ApS.end = ""
+AND  ApS.begin <= "{today}"       AND ApS.end = ""
 AND  ApS.statusID = St.statusID
 AND  PS1.personID = S1.personID  AND PS2.personID = S2.personID
 AND  PS1.statusID = 15           AND PS2.statusID = 15
-AND  PS1.begin < "{today}"       AND PS1.begin < "{today}"
+AND  PS1.begin <= "{today}"       AND PS1.begin <= "{today}"
 AND (PS1.end = ""                 OR PS1.end > "{today}")
 AND (PS2.end = ""                 OR PS2.end > "{today}")
 ;

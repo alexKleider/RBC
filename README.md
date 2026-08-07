@@ -11,7 +11,7 @@ it proved impossible to stick to it regorously!
 
 Layers used are: 
     * code/data 
-        Deals with the data base.
+        Deals with the data base via the sql.py module
         Currently using Sqlite3 (see code/data/sql.py)
     * code/logic
         The logic layer
@@ -21,29 +21,17 @@ Layers used are:
         The user interface
     * main
         The driver program although it can be driven by logic
-App_mapping keys are:
-    first: Joe
-    last: Schmo
-    suffix: 
-    phone: 868
-    address: Elm
-    town: Bo
-    state: CA
-    postal_code: 949
-    country: usa
-    email: js@mail
-    personID: 253
-    app_rcvd: 20260408
-    fee_rcvd: 20260428
-    meeting1: 
-    s1_ID: 97
-    s2_ID: 35
-    s1_first
-    s1_last
-    s1_suffix
-    s1_email
-    s2_first
-    s2_last
-    s2_suffix
-    s2_email
+
+App_mapping keys are:  (See Sql/all_applicants_f.sql)
+    PS_statusID, A_app_rcvd, S1_personID, S2_personID,
+    P_personID,  A_fee_rcvd, S1_first,    S2_first,
+    P_last,      A_meeting1, S1_last,     S2_last,
+    P_first,     A_meeting2, S1_suffix,   S2_suffix,
+    P_suffix,    A_meeting3, PS1_statusID,PS2_statusID,
+    P_phone,     A_approved,,
+    P_address,   A_dues_paid,
+    P_town,      A_notified,
+    P_state,
+    P_postal_code,
+    P_email,
 

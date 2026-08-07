@@ -11,6 +11,9 @@ is only used for testing.)
 Uses sqlite3 via sql.py module.
 """
 
+import os
+import csv
+import shutil
 try: import cli as ui
 except ImportError: from code import cli as ui
 try: import sql
@@ -18,6 +21,11 @@ except ImportError: from code import sql
 try: import helpers
 except ImportError: from code import helpers
 
+store_data = True
+store_dict = {
+        "create_person": "A_create_person.json",
+        }
+# used for people.create_person (A_new_person.json)
 
 def announce(header="Note the following...",
              text="Announcing..."):
@@ -427,6 +435,53 @@ def show_all_app_info():
         listing.append("")
         ret.extend(listing)
     return ret
+
+def db2csv(report=None):
+    """
+    Backs up the data base (Data/club.db) by creating a csv file
+    for each table, putting them all into a separate directory,
+    and then creating a zip file to be backed up on Google Drive.
+    The "Attrition" table is no longer maintained!
+    - instead use code/reports.attrition_csv() ==>
+            lost.csv
+    """
+    if not report:
+        report = []
+    tempdir = "TempZIP_Dir"
+    zip_name = f"{helpers.eightdigitdate4filename}_db_as_CSVs"
+    tables = sql.fetch(
+            """SELECT name FROM sqlite_master
+               WHERE type='table';""", from_file=False)
+    tables = [table[0] for table in tables]
+    os.mkdir(tempdir)
+    attrition_csv() # to replace attrition table
+    shutil.move('lost.csv', tempdir+'/'+'lost.csv')
+    # now handle the tables...
+    for table in tables:
+        file_name = tempdir +'/' + f"{table}.csv"
+        keys = sql.keys_from_schema(table)
+        with open(file_name, 'w', newline='') as stream:
+            csv_writer = csv.writer(stream)
+            csv_writer.writerow(sql.keys_from_schema(table))
+            res = sql.fetch(f"SELECT * FROM {table};",
+                    from_file=False)
+            for row in res:
+                csv_writer.writerow(row)
+    archived = shutil.make_archive(zip_name, 'zip', tempdir)
+    report.append("created: " + repr(archived))
+    print(report[-1])
+    print("Attrition table is no longer maintained.")
+    print(f"Refer to 'lost.csv' instead.")
+    shutil. rmtree(tempdir)
+    return report
+
+def attrition_csv():
+    print("Collecting data re former members...")
+    outf_name = "lost.csv"
+    with open("Sql/4attrition.sql", 'r') as inf:
+        query = inf.read()
+    sql.query2csv(query, outf_name)
+    print(f"Output sent to {outf_name}")
 
 def ck_get_all_app_info():
     mappings = [map_ for map_ in get_all_app_info()]

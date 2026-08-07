@@ -32,6 +32,10 @@ try: from code import applicants
 except ImportError: import applicants
 try: from code import reports
 except ImportError: import reports
+try: from code import data
+except ImportError: import data
+#try: from code import sql
+#except ImportError: import sql
 
 
 cmds_available = [
@@ -41,7 +45,9 @@ cmds_available = [
     send_emails.test_send,
     ck_data.check_consistency_report,
     reports.file_exec_report,
-    reports.file4web
+    reports.file4web,
+    data.attrition_csv,
+    data.db2csv
     ]
 
 def main():

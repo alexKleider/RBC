@@ -3,10 +3,18 @@
 # File: people.py
 
 """
+Code dealing with the People table.
 """
 
 from code import helpers
 from code import data
+
+# if True:
+#   When entering data: option is provided to
+#   collect it from a JSON file
+#   and
+#   once entered, option is provided to 
+#   save it in a JSON file (for future use prn.)
 
 def create_person():
     """
@@ -17,25 +25,35 @@ def create_person():
     allows one to have data available without having
     to re-enter it. == A_new_person.json
     """
-    yn = input("Enter person data (yY) or collect from file?: ")
-    if (yn and yn[0] in ("yY")): 
+    def collect_data():
         keys = data.person_keys()
         mapping = {key: "" for key in keys}
         person = data.entries(mapping,
             header="Adding New Person to People Table",
             text="Add values (empty strings accepted)... ")
+        return person
+    
+    if data.store_data:  # allow use of existing data
+        yn = input("Load existing data (yY): ")
+        if (yn and yn[0] in ("yY")): 
+            person = helpers.load_json_file(
+                    data.store_dict["create_person"])
+        else:
+            person = collect_data()
     else:
-        person = helpers.load_json_file("A_new_person.json") 
+        person = collect_data()
+
     if person:
         data.put_person(person)
-        # for debugging purposes: saves the data so
-        # it can be retrieved next time code is run
-        helpers.dump2json(person,
-                          "A_new_person.json")
+        if data.store_data:
+            # for debugging purposes: saves the data so
+            # it can be retrieved next time code is run
+            helpers.dump2json(person,
+                        data.store_dict["create_person"])
         person["personID"] = get_lastID()
         return person
     else:
-        print("logic/create_person: person is False")
+        print("logic/create_person returning None!")
 
 def get_person():
     """

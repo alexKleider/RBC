@@ -7,13 +7,13 @@ SQL(ite3) helper code.
 Code involving specific queries should be in code/data.py
 """
 
-import os
 import csv
 import json
-import shutil
 import sqlite3
 try: import helpers
 except ImportError: from code import helpers
+try: import reports
+except ImportError: from code import reports
 
 db_file_name = "/home/alex/Git/RBC/Data/club.db"
 
@@ -340,37 +340,6 @@ def query_keys(query):
             nowhitespace = nowhitespace + ch
     keys = nowhitespace.split(',')
     return  [key.replace(".", "_") for key in keys]
-
-def db2csv(report=None):
-    """
-    Backs up the data base (Data/club.db) by creating a csv file
-    for each table, putting them all into a separate directory,
-    and then creating a zip file to be backed up on Google Drive.
-    """
-    if not report:
-        report = []
-    tempdir = "TempZIP_Dir"
-    zip_name = f"{helpers.eightdigitdate4filename}_db_as_CSVs"
-    tables = fetch(
-            """SELECT name FROM sqlite_master
-               WHERE type='table';""", from_file=False)
-    tables = [table[0] for table in tables]
-    os.mkdir(tempdir)
-    for table in tables:
-        file_name = tempdir +'/' + f"{table}.csv"
-        keys = keys_from_schema(table)
-        with open(file_name, 'w', newline='') as stream:
-            csv_writer = csv.writer(stream)
-            csv_writer.writerow(keys_from_schema(table))
-            res = fetch(f"SELECT * FROM {table};",
-                    from_file=False)
-            for row in res:
-                csv_writer.writerow(row)
-    archived = shutil.make_archive(zip_name, 'zip', tempdir)
-    report.append("created: " + repr(archived))
-    print(report[-1])
-    shutil. rmtree(tempdir)
-    return report
 
 ## should not all of the following
 ## be moved to  code/data.py???

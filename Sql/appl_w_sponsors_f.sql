@@ -27,7 +27,7 @@ AND   PS2.personID = S2.personID
 AND   S2.personID = Ap.sponsor2ID
 AND   PS2.statusID < 20
 AND   PS2.end = ""
-AND   (PS.end = "" OR PS.end > {today})
+AND   (PS.end = "" OR PS.end >= {today})
 AND   PS.statusID < 11
 --ORDER BY P.last, P.first, P.suffix
 ORDER BY PS.statusID ASC, P.personID ASC

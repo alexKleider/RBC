@@ -15,7 +15,7 @@ FROM Applicants AS Ap,
 WHERE Ap.personID = P.personID
 AND   Ap.personID = PS.personID
 AND   PS.statusID < 11
-AND   (PS.end = "" OR PS.end > {today})
+AND   (PS.end = "" OR PS.end >= {today})
 ORDER BY PS.statusID, Ap.app_rcvd,
         P.last, P.first, P.suffix
 ;

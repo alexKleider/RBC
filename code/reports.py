@@ -21,6 +21,8 @@ try: import helpers
 except ImportError: from code import helpers
 try: import data
 except ImportError: from code import data
+try: import sql
+except ImportError: from code import sql
 
 today = helpers.eightdigitdate4filename
 f_exec_report = f"report2exec_{today}.txt"
@@ -65,32 +67,37 @@ def applicant_listing():
     # set up a template for each applicant entry...
     template = """  [{P_personID:>3}] {P_first} {P_last} {P_suffix} {P_email} {P_phone}
      Sponsors: {S1_first} {S1_last} {S1_suffix}, {S2_first} {S2_last} {S2_suffix}  [{S1_personID}, {S2_personID}]
-     Applied: {Ap_app_rcvd}  """
-    # Last line varies /w # of meetings...
-    add3 = "Meetings: {Ap_meeting1}, {Ap_meeting2}, {Ap_meeting3}"
-    add2 = "Meetings: {Ap_meeting1}, {Ap_meeting2}"
-    add1 = "Meeting date: {Ap_meeting1}"
+     Applied: {A_app_rcvd}  """
+    # Meeting line varies /w # of meetings...
+    add3 = "Meetings: {A_meeting1}, {A_meeting2}, {A_meeting3}"
+    add2 = "Meetings: {A_meeting1}, {A_meeting2}"
+    add1 = "Meeting date: {A_meeting1}"
+    # ... will later add a another line if approved!
     # Collectors & headers...
     no_meetings = []; header0 = "No Meetings Yet"
     one_meeting = []; header1 = "Attended One Meeting"
     two_meetings = []; header2 = "Attended Two Meetings"
     three_meetings = []; header3 = "Attended Three Meetings"
-    m3 = []; m2 = []; m1 = []; m0 = []
+    approved = []; headerA = "Approved for membership"
+    a = []; m3 = []; m2 = []; m1 = []; m0 = []
     # Get the mappings...
     apps = data.get_mappings("applicants")
     n_apps = len(apps)
     # Separate into "by meeting" listings...
     for map in apps:
-        if map["Ap_meeting3"]:
+        if map["A_approved"]:
+            a.append(map)
+        elif map["A_meeting3"]:
             m3.append(map)
-        elif map["Ap_meeting2"]:
+        elif map["A_meeting2"]:
             m2.append(map)
-        elif map["Ap_meeting1"]:
+        elif map["A_meeting1"]:
             m1.append(map)
-        elif map["Ap_meeting0"]:
+        elif map["A_meeting0"]:
             m0.append(map)
         else:
-            _ = input("bypassed in code/reports!")
+            _ = input(
+            "Failure! bypassed in code/reports!")
     # Assemble the report...
     report = []
     n = 0
@@ -129,6 +136,18 @@ def applicant_listing():
         for d in m3:
             report.append(_limit_line_lengths(
                 template3.format(**d)))
+            report.append("")
+            n += 1
+    if a:  # 3 meetings & approved
+        report.append(headerA)
+        report.append('-' * len(report[-1]))
+        templateA = template + add3
+        for d in a:
+            report.append(_limit_line_lengths(
+                template3.format(**d)))
+            date = f"{d['A_approved']}"
+            report.append(
+            f"     Approved: {date}")
             report.append("")
             n += 1
 #       report.append("")
@@ -221,8 +240,13 @@ def _header4(whom):
                        ])
     elif whom == "exec":
         header.append(
-            f"Executive Committee (prepared {helpers.date})")
+            f"Membership Report (prepared {helpers.date})")
         header.append("=" * len(header[0]))
+        header.extend(["",
+        f"Current active membership stands at {tm} of which {f}",
+        "are still  within their first year of membership.",
+                       "",
+                       ])
 
     elif whom == "applicants":
         header.append(
@@ -248,6 +272,7 @@ def exec_report():  # report to executive committee
     Returns a list of lines/strings.
     """
     report = _header4("exec")
+    ###############
     report.extend(applicant_report())
     report.extend(
         ['',
