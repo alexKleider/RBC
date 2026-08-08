@@ -47,7 +47,8 @@ cmds_available = [
     reports.file_exec_report,
     reports.file4web,
     data.attrition_csv,
-    data.db2csv
+    data.db2csv,
+    data.app_sponsors,
     ]
 
 def main():

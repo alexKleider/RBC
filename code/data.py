@@ -483,6 +483,20 @@ def attrition_csv():
     sql.query2csv(query, outf_name)
     print(f"Output sent to {outf_name}")
 
+def app_sponsors():
+    out_f = "sponsors.json"
+    sql_f = "Sql/sponsors.sql"
+    print("Collecting Sponsor data...")
+    appID = input(
+            "Provide an applicant's personID: ")
+    with open(sql_f, 'r') as inf:
+        query = inf.read()
+    query = query.format(**{"personID": appID})
+    listing = sql.fetch(query, from_file=False)
+    print(f"{len(listing)=}")
+    sql.query2json(query, out_f)
+    print(f"Data sent to {out_f}.")
+
 def ck_get_all_app_info():
     mappings = [map_ for map_ in get_all_app_info()]
     res = ["Applicants",]
