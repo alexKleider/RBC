@@ -120,7 +120,8 @@ def member_mappings():
 def numbers(m_type):
     """
     <m_type> options: "in_good_standing", "first_yr",
-    "honorary", "inactive", "retiring", "applicants"
+    "honorary", "inactive", "retiring", "applicants",
+    "committee", ...
     Each in turn calls the appropriate Sql file
     n_[]_ff.sql and returns the count.
     """
@@ -151,6 +152,31 @@ def in_good_standing(personID):
 #           print(line)
 #   else:
 #       print(f"{personID} not in good standing")
+
+def leadership_listing():
+    """
+    Returns a listing of dicts,
+    one for each board member.
+    """
+    query = sql.get_f_query("Sql/leadership_f.sql",
+                {"today" :helpers.eightdigitdate , })
+
+    leaders = [d for d in sql.dicts_from_query(
+        query, replace_periods=True)]
+    return leaders
+
+def leadership_report():
+    """
+    Returns an array of lines reporting those 
+    in leadership positions.
+    """
+    pass
+
+def committee():
+    pass
+
+def committee_report():
+    pass
 
 def ck_in_good_standing():
     for id_ in (100, 250):
@@ -558,12 +584,22 @@ def ck_numbers():
                    "honorary", "inactive"):
         print(f"There are {data.numbers(m_type)} {m_type} members.")
 
+def ck_leadership():
+    for mapping in get_mappings("leadership"):
+        print([value for value in mapping.values()])
+
+def ck_leadership_listing():
+    for line in leadership_listing():
+        print(line)
 
 if __name__ == "__main__":
     print("running code/data.py")
-    ck_in_good_standing()
+    ck_leadership()
+#   ck_in_good_standing()
 #   ck_add_receipt()
 #   ck_update_person_status()
 #   ck_get_app_info()
 #   ck_app_queries()
 #   ck_show_all_app_info()
+error = """
+"""

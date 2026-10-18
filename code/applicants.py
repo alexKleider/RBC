@@ -148,6 +148,10 @@ def add_dates(applicant):
             and isinstance(ap_mapping, dict)):
         print("major problem in code/logic.add_dates")
         return
+    # debugging...
+    for k,v in ap_mapping.items():
+        print(f"{k}: {v}")
+        _ = input()
     for key in ("notified", "dues_paid", "approved", 
                 "meeting3", "meeting2","meeting1",
                 "fee_rcvd", "app_rcvd"):
@@ -309,7 +313,8 @@ def update_applicant():
     # need to add sponsor data!!
     mapping = collect_sponsors(mapping)
     # pass info to letters to create emails
-    letters.generate_letter(_letter_, mapping)
+    # not yet implemented properly
+#   letters.generate_letter(_letter_, mapping)
 
 
 
@@ -364,4 +369,5 @@ if __name__ == "__main__":
     print("Running code/applicants.py")
     main()
 #   ck_collect_sponsors()
-
+error = """
+"""

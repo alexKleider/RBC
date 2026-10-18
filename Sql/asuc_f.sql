@@ -5,6 +5,6 @@ Also consider {status2close}
 */
 UPDATE Person_Status SET
     end = {date}
-WHERE personID = {A_personID}
+WHERE personID = {P_personID}
   AND statusID = {status2close}
     ;

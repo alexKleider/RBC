@@ -676,4 +676,19 @@ def ck_get_rec():
 if __name__ == "__main__":
 #   ck_pick_People_record()
     ck_get_applicant()
-
+error = """
+Traceback (most recent call last):
+  File "/home/alex/Git/RBC/./main.py", line 73, in <module>
+    main()
+  File "/home/alex/Git/RBC/./main.py", line 61, in main
+    res = command()
+          ^^^^^^^^^
+  File "/home/alex/Git/RBC/code/applicants.py", line 337, in update_applicant
+    data.update_applicant_status(mapping)
+  File "/home/alex/Git/RBC/code/data.py", line 79, in update_applicant_status
+    sql.fetch_d_query("Sql/asuc_f.sql",
+  File "/home/alex/Git/RBC/code/sql.py", line 110, in fetch_d_query
+    query = query.format(**data)
+            ^^^^^^^^^^^^^^^^^^^^
+KeyError: 'A_personID'
+"""

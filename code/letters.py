@@ -287,13 +287,15 @@ Bolinas, CA 94924.""",
 
     expired_application="""
 With considerable regret it is my duty to inform you that
-it's been more than six months since your membership
-application has been received and during that time you've
-failed to attend the required three Club meetings. This
-causes your application to expire.
-If you still wish to be a member of the Bolinas Rod and
-Boat Club the application process must begin again and
-I suggest you work closely with your sponsors.""",
+since your application was received you have failed to
+attended any three of six consecutive regular meetings
+and as a result bylaws dictate that your application be
+withdrawn. If you still wish to become a member, you may
+initiate the Application Process from the beginning.
+I suggest you work closely with your sponsors.
+Sincerely,
+Alex Kleider (Membership)
+""",
 
     bad_email="""
 Emails sent to you at "{email}" are being rejected.

@@ -9,6 +9,7 @@ Provides the following:
     _limit_line_lengths, _header4, 
     applicant_listing, applicant_report
     member_listing,
+    leadership_listing,
     exec_report,
     forWeb
 #
@@ -85,6 +86,10 @@ def applicant_listing():
     n_apps = len(apps)
     # Separate into "by meeting" listings...
     for map in apps:
+#       print("=====================")
+#       for k,v in map.items():
+#           print(f"{k}: {v}")
+#       _ = input("-----------------")
         if map["A_approved"]:
             a.append(map)
         elif map["A_meeting3"]:
@@ -93,7 +98,7 @@ def applicant_listing():
             m2.append(map)
         elif map["A_meeting1"]:
             m1.append(map)
-        elif map["A_meeting0"]:
+        elif map["A_app_rcvd"]:
             m0.append(map)
         else:
             _ = input(
@@ -104,9 +109,10 @@ def applicant_listing():
     if m0:
         report.append(header0)
         report.append('-' * len(report[-1]))
+        template0 = template
         for d in m0:
             report.append(_limit_line_lengths(
-                template2.format(**d)))
+                template0.format(**d)))
             report.append("")
             n += 1
     if m1:
@@ -175,6 +181,7 @@ def applicant_report():
     """
     app_data_w_n = applicant_listing()
     n_apps = int(app_data_w_n[-1])
+    _ = input(f"n_applicants = {n_apps}")
     report_body = app_data_w_n[:-1]
     report = _header4("applicants")
     report[-2] = report[-2].format(
@@ -182,6 +189,12 @@ def applicant_report():
 #   report.append("")
     report.extend(report_body)
     return report
+
+def leadership_listing():
+    return data.leadership_listing
+
+def leadership_report():
+    return data.leadership_report()
 
 def member_listing(flags={
         11: "*", 15: " ", 14: "@", 16: "%", 17: "^"},
@@ -217,7 +230,7 @@ def member_listing(flags={
 def _header4(whom):
     """
     <whom> possible values: web", "exec", "applicants",
-    "honorary", "inactive", ...
+    "honorary", "inactive", "committee", ...
     """
     gs = data.numbers("in_good_standing")
     f = data.numbers("first_yr")
@@ -225,6 +238,7 @@ def _header4(whom):
     h = data.numbers("honorary")
     i = data.numbers("inactive")
     a = data.numbers("applicants")
+    c = data.numbers("committee")
     header = []
     if whom == "web":
         header = [f"Membership Roster (as of {helpers.date})", ]
@@ -296,6 +310,9 @@ def file_exec_report():
             print(line, file=f)
         print(f"Exec report sent to {f.name}")
 
+def committee_listing():
+    pass
+
 def web_listing():
     """
     """
@@ -325,6 +342,15 @@ def file4web():
         for line in listing:
             print(line, file=f)
         print(f"WWW report sent to {f.name}")
+
+def send2file(listing, test_file=None):
+    if not test_file:
+        test_file = "2check.txt"
+    report = "\n".join(listing)
+    with open(test_file, "w") as outf:
+        outf.write(report)
+        print("",file=outf)
+    print(f"Output sent to '{test_file}'.")
 
 
 def ck__limit_line_lengths():
@@ -364,15 +390,6 @@ def ck_member_mappings():
             print()
         n += 1
 
-def send2file(listing, test_file=None):
-    if not test_file:
-        test_file = "2check.txt"
-    report = "\n".join(listing)
-    with open(test_file, "w") as outf:
-        outf.write(report)
-        print("",file=outf)
-    print(f"Output sent to '{test_file}'.")
-
 def ck_member_listing():
     print("Current full members only...")
     listing = member_listing({11: "*",15: " "})
@@ -384,7 +401,15 @@ def ck_headers():
 #   send2file(_header4("exec"), "4exec.txt")
 #   send2file(_header4("applicants"), "4applicants.txt")
 
+def ck_app_listing():
+    listing = applicant_listing()
+    with open("listing.txt", 'w') as source:
+        source.write("\n".join([str(item) for item in listing]))
+        print(f"app listing sent to {source.name}")
+
 if __name__ == "__main__":
-    send2file(forWeb())
+    ck_app_listing()
+#   committee_listing()
+#   file4Web()
 #   ck_member_listing()
 
