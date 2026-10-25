@@ -21,7 +21,7 @@ import time
 import datetime
 import functools
 import collections
-#from pathlib import Path
+from pathlib import Path
 
 nowasint = int(time.time())
 date_template = "%b %d, %Y"
@@ -503,6 +503,11 @@ def join_email_listings(*args):
             res.extend(arg)
     return ','.join(sorted(set(res)))
 
+def add_addendum(listing, file = "Data/addendum.txt"):
+    if Path(file).is_file():
+        with open(file, 'r') as inf:
+            content = inf.read().split("\n")
+        listing.extend(content)
 
 def script_location():
     return os.getcwd()
@@ -1532,8 +1537,18 @@ def ck_dates():
     print(f"{this_year=}")
     print(f"{date=}")
 
+def ck_add_addendum():
+    listing = ["1st line", "2nd line", "3rd line"]
+    listing2 = ["first", "secont", "third", "fourth"]
+    empty = []
+    add_addendum(listing)
+    listing.extend(listing2)
+    for line in listing:
+        print(line)
+
 if __name__ == "__main__":
-    ck_dates()
+    ck_add_addendum()
+#   ck_dates()
 #   ck_date4letter()
 #   ck_dump_load_json()
 #   ck_dump2json()

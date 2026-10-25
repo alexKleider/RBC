@@ -181,7 +181,7 @@ def applicant_report():
     """
     app_data_w_n = applicant_listing()
     n_apps = int(app_data_w_n[-1])
-    _ = input(f"n_applicants = {n_apps}")
+#   _ = input(f"n_applicants = {n_apps}")
     report_body = app_data_w_n[:-1]
     report = _header4("applicants")
     report[-2] = report[-2].format(
@@ -288,6 +288,7 @@ def exec_report():  # report to executive committee
     report = _header4("exec")
     ###############
     report.extend(applicant_report())
+    helpers.add_addendum(report)
     report.extend(
         ['',
          "Respectfully submitted by...\n",
